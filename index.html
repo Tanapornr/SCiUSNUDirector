@@ -3,145 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสารสนเทศบุคลากร - โครงการ วมว. มน.</title>
+    <title>ระบบสารสนเทศ วมว. มน.</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary-color: #f37021; --secondary-color: #0056b3; --bg-color: #f4f7f6; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; }
-        .navbar { background: white; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .navbar h1 { margin: 0; font-size: 1.5em; color: var(--secondary-color); }
-        .tab-buttons button { padding: 10px 20px; font-family: 'Sarabun'; font-size: 1em; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; color: #666; }
-        .tab-buttons button.active { color: var(--secondary-color); border-bottom: 3px solid var(--secondary-color); }
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        .tab-content { display: none; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .tab-content.active { display: block; }
-        .person-card { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .info { flex-grow: 1; }
-        .name { font-size: 1.2em; font-weight: bold; }
-        .role { color: #666; font-size: 0.9em; }
-        .status-badge { padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; text-align: center; display: inline-block; min-width: 80px; }
-        .status-in { background: #d4edda; color: #155724; }
-        .status-out { background: #f8d7da; color: #721c24; }
-        .status-meeting { background: #fff3cd; color: #856404; }
-        .status-leave { background: #e2e3e5; color: #383d41; }
-        .status-acting { background: #f3e5f5; color: #4a148c; border: 1px solid #7b1fa2; }
-        .action-area { display: flex; gap: 10px; align-items: center; }
-        select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-family: 'Sarabun'; }
-        .btn-update { padding: 8px 15px; background: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Sarabun'; }
-        .auto-text { color: #999; font-size: 0.85em; font-style: italic; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        .day-name { text-align: center; font-weight: 600; padding: 10px; background: var(--secondary-color); color: white; border-radius: 6px; }
-        .day-cell { min-height: 100px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px; }
-        .event { font-size: 0.75em; padding: 4px; border-radius: 4px; margin-top: 4px; border-left: 3px solid; }
-        .event-absent { background: #ffebee; color: #c62828; border-color: #d32f2f; }
+        :root { --primary: #f37021; --secondary: #0056b3; --bg: #f0f2f5; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; }
+        .navbar { background: white; padding: 10px 20px; display: flex; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top:0; z-index:100; }
+        .tab-btn { padding: 10px 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: var(--secondary); border-bottom-color: var(--secondary); }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* Status List */
+        .person-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
+        .bg-in { background: #d4edda; color: #155724; }
+        .bg-out { background: #f8d7da; color: #721c24; }
+        .bg-acting { background: #f3e5f5; color: #4a148c; border: 1px solid #7b1fa2; }
+        
+        /* Calendar */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day { background: white; border: 1px solid #eee; min-height: 80px; padding: 5px; font-size: 0.8em; }
+        .cal-head { background: var(--secondary); color: white; text-align: center; padding: 5px; font-weight: bold; }
+        
+        /* Admin Form */
+        .form-group { margin-bottom: 15px; }
+        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ddd; }
+        button { background: var(--secondary); color: white; border: none; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>ระบบสารสนเทศ โครงการ วมว. มน.</h1>
-        <div class="tab-buttons">
-            <button class="active" onclick="switchTab('statusTab')" id="btn-statusTab">กระดานสถานะวันนี้</button>
-            <button onclick="switchTab('calendarTab')" id="btn-calendarTab">ปฏิทินปฏิบัติงาน</button>
+
+<div class="navbar">
+    <h3 style="color:var(--secondary); margin:0;">วมว. มน. Status</h3>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('home')">หน้าแรก</button>
+        <button class="tab-btn" onclick="showTab('calendar')">ปฏิทิน</button>
+        <button class="tab-btn" onclick="showTab('admin')">แอดมิน</button>
+    </div>
+</div>
+
+<div class="container">
+    <div id="home" class="tab-content">
+        <div class="card">
+            <h2 id="currentDateDisplay" style="margin-top:0;"></h2>
+            <div id="statusList">กำลังโหลดข้อมูล...</div>
         </div>
     </div>
 
-    <div class="container">
-        <div id="statusTab" class="tab-content active">
-            <h2 style="color: var(--secondary-color);">สถานะผู้บริหารและเจ้าหน้าที่</h2>
-            <div id="statusBoard">กำลังโหลดข้อมูล...</div>
-        </div>
-        <div id="calendarTab" class="tab-content">
-            <h2 id="monthYearDisplay">ปฏิทินปฏิบัติงาน</h2>
-            <div class="calendar-grid" id="calendarGrid"></div>
+    <div id="calendar" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="cal-header">
+                <button onclick="changeMonth(-1)" style="width:auto;">◀ เดือนก่อน</button>
+                <h3 id="calMonthYear"></h3>
+                <button onclick="changeMonth(1)" style="width:auto;">เดือนหน้า ▶</button>
+            </div>
+            <div id="calendarGrid" class="cal-grid"></div>
         </div>
     </div>
 
-    <script>
-        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxBzXwL0LzTFGJaqcjAHfZEjeesHaMUWNmUHdY4iET_QJD0dGlyqU50ygr9dxRy5gIACw/exec';
-        const API_STATUS = `${GAS_BASE_URL}?sheet=Status`;
-        const API_CALENDAR = `${GAS_BASE_URL}?sheet=Schedule`;
+    <div id="admin" class="tab-content" style="display:none;">
+        <div class="card">
+            <h2>ลงตารางไม่อยู่ (ระบุช่วงวันที่)</h2>
+            <div class="form-group">
+                <label>ชื่อผู้บริหาร/เจ้าหน้าที่</label>
+                <select id="adminNameSelect"></select>
+            </div>
+            <div class="form-group">
+                <label>จากวันที่</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label>ถึงวันที่</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="form-group">
+                <label>สาเหตุ/สถานที่</label>
+                <input type="text" id="reason" placeholder="เช่น ราชการ กทม.">
+            </div>
+            <button onclick="submitAbsence()">บันทึกข้อมูลตารางเวลา</button>
+        </div>
+    </div>
+</div>
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById(`btn-${tabId}`).classList.add('active');
-            if(tabId === 'statusTab') loadStatusData();
-            if(tabId === 'calendarTab') loadCalendarData();
-        }
+<script>
+    // 🔴 แก้ URL ของคุณที่นี่ 🔴
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxL6A1s3Hoj96c2fHUKqK-JqMiNnpc5PCGkh8YAlTrLWftKhN9NZ0bPT1RXoMoAefqI-Q/exec';
 
-        async function loadStatusData() {
-            const board = document.getElementById('statusBoard');
-            try {
-                const [sRes, cRes] = await Promise.all([fetch(API_STATUS), fetch(API_CALENDAR)]);
-                const statusData = await sRes.json();
-                const calendarData = await cRes.json();
-                
-                const todayStr = new Date().toISOString().split('T')[0];
-                const isWeekend = [0, 6].includes(new Date().getDay());
-                const todaysEvents = calendarData.filter(e => e.date === todayStr);
-                
-                const isDirAbsent = todaysEvents.some(e => e.name.includes('ฑิราณี') && e.type === 'absent') || 
-                                   ['ไม่อยู่', 'ลา'].includes(statusData.find(p => p.Name.includes('ฑิราณี'))?.Status);
+    let rawStatus = [];
+    let rawSchedule = [];
+    let viewDate = new Date();
 
-                board.innerHTML = '';
-                statusData.forEach(p => {
-                    let curStatus = p.Status || 'อยู่';
-                    let dispStatus = curStatus;
-                    let sClass = 'status-in';
-                    let isAuto = false;
+    async function loadAllData() {
+        const [res1, res2] = await Promise.all([
+            fetch(API_URL + '?sheet=Status'),
+            fetch(API_URL + '?sheet=Schedule')
+        ]);
+        rawStatus = await res1.json();
+        rawSchedule = await res2.json();
+        renderHome();
+        renderCalendar();
+        populateAdminSelect();
+    }
 
-                    if(isWeekend) { dispStatus = 'วันหยุด'; sClass = 'status-leave'; isAuto = true; }
-                    else {
-                        const ev = todaysEvents.find(e => e.name.includes(p.Name));
-                        if(ev) { dispStatus = ev.status; sClass = ev.type === 'absent' ? 'status-out' : 'status-meeting'; isAuto = true; }
-                        else {
-                            if(curStatus === 'ไม่อยู่') sClass = 'status-out';
-                            if(curStatus === 'ประชุม') sClass = 'status-meeting';
-                            if(curStatus === 'ลา') sClass = 'status-leave';
-                        }
-                        if(p.Name.includes('ฑิราณี') && !isDirAbsent && curStatus === 'อยู่') dispStatus = 'อยู่ (ลงนามได้)';
-                        if(p.Name.includes('ทนงศักดิ์') && isDirAbsent && !ev) { dispStatus = 'รักษาราชการแทน ผอ.'; sClass = 'status-acting'; isAuto = true; }
-                    }
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display = 'block';
+        event.target.classList.add('active');
+    }
 
-                    board.innerHTML += `
-                        <div class="person-card">
-                            <div class="info"><div class="name">${p.Name}</div><div class="role">${p.Role}</div></div>
-                            <div><span class="status-badge ${sClass}">${dispStatus}</span></div>
-                            <div class="action-area">
-                                ${isAuto ? '<span class="auto-text">อัตโนมัติ</span>' : 
-                                `<select id="sel-${p.ID}"><option value="อยู่">อยู่</option><option value="ไม่อยู่">ไม่อยู่</option></select>
-                                 <button class="btn-update" onclick="updateStatus('${p.ID}')">บันทึก</button>`}
-                            </div>
-                        </div>`;
-                });
-            } catch (e) { board.innerHTML = "Error: " + e.message; }
-        }
+    function renderHome() {
+        const list = document.getElementById('statusList');
+        const dateDisplay = document.getElementById('currentDateDisplay');
+        const today = new Date();
+        const todayISO = today.toISOString().split('T')[0];
+        
+        dateDisplay.innerText = "ประจำวันที่ " + today.toLocaleDateString('th-TH', { day:'numeric', month:'long', year:'numeric' });
 
-        async function updateStatus(id) {
-            const stat = document.getElementById(`sel-${id}`).value;
-            await fetch(GAS_BASE_URL, { method: 'POST', body: JSON.stringify({id, status: stat}) });
-            loadStatusData();
-        }
+        // กฎ 1: เช็คสถานะวันนี้ (จากปฏิทิน Schedule)
+        const absentToday = rawSchedule.filter(s => todayISO >= s.startDate && todayISO <= s.endDate);
+        
+        // กฎ 2: หาว่า ผอ. ฑิราณี อยู่ไหม
+        const isDirectorAbsent = absentToday.some(s => s.name.includes('ฑิราณี')) || 
+                                 rawStatus.find(p => p.Name.includes('ฑิราณี'))?.Status === 'ไม่อยู่';
 
-        let calendarData = [];
-        async function loadCalendarData() {
-            const res = await fetch(API_CALENDAR);
-            calendarData = await res.json();
-            renderCalendar();
-        }
+        list.innerHTML = '';
+        rawStatus.forEach(p => {
+            let status = p.Status || 'อยู่'; // กฎ: ถ้าไม่ระบุ ถือว่าอยู่
+            let sClass = 'bg-in';
+            let note = "";
 
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-            ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].forEach(d => grid.innerHTML += `<div class="day-name">${d}</div>`);
-            const daysInMonth = new Date(2026, 2+1, 0).getDate(); // มีนาคม 2026
-            for(let d=1; d<=daysInMonth; d++) {
-                grid.innerHTML += `<div class="day-cell"><strong>${d}</strong></div>`;
+            // เช็คจากตาราง Schedule (Admin ลงไว้)
+            const scheduleRecord = absentToday.find(s => s.name.includes(p.Name));
+            if(scheduleRecord) {
+                status = "ไม่อยู่ (" + scheduleRecord.reason + ")";
+                sClass = "bg-out";
             }
-        }
 
-        loadStatusData();
-    </script>
+            // กฎพิเศษ ฑิราณี-ทนงศักดิ์
+            if(p.Name.includes('ฑิราณี') && status === 'อยู่') {
+                note = " (ผู้ลงนาม)";
+            }
+            if(p.Name.includes('ทนงศักดิ์') && isDirectorAbsent) {
+                // ถ้า อ.ทนงศักดิ์ ไม่ได้ลาราชการเอง ให้เป็นรักษาราชการแทน
+                if(!scheduleRecord) {
+                    status = "รักษาราชการแทน ผอ.";
+                    sClass = "bg-acting";
+                }
+            }
+
+            list.innerHTML += `
+                <div class="person-item">
+                    <div>
+                        <strong>${p.Name}</strong><br>
+                        <small style="color:#666">${p.Role}</small>
+                    </div>
+                    <div>
+                        <span class="status-badge ${sClass}">${status}${note}</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        const monthYear = document.getElementById('calMonthYear');
+        grid.innerHTML = '';
+        
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+        monthYear.innerText = new Intl.DateTimeFormat('th-TH', { month:'long', year:'numeric' }).format(viewDate);
+
+        ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="cal-head">${d}</div>`);
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for(let i=0; i<firstDay; i++) grid.innerHTML += `<div></div>`;
+
+        for(let d=1; d<=daysInMonth; d++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const events = rawSchedule.filter(s => dateStr >= s.startDate && dateStr <= s.endDate);
+            
+            let eventText = events.map(e => `<div style="color:red; font-size:9px;">• ${e.name.split(' ')[1]} ลา</div>`).join('');
+            
+            grid.innerHTML += `
+                <div class="cal-day">
+                    <strong>${d}</strong>
+                    ${eventText}
+                </div>
+            `;
+        }
+    }
+
+    function changeMonth(step) {
+        viewDate.setMonth(viewDate.getMonth() + step);
+        renderCalendar();
+    }
+
+    function populateAdminSelect() {
+        const select = document.getElementById('adminNameSelect');
+        select.innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join('');
+    }
+
+    async function submitAbsence() {
+        const data = {
+            action: 'addAbsence',
+            name: document.getElementById('adminNameSelect').value,
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value,
+            reason: document.getElementById('reason').value
+        };
+        if(!data.startDate || !data.endDate) return alert("กรุณาระบุวันที่");
+        
+        await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
+        alert("บันทึกสำเร็จ");
+        loadAllData();
+    }
+
+    loadAllData();
+</script>
+
 </body>
 </html>
