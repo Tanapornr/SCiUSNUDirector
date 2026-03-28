@@ -64,7 +64,6 @@
         .event-work { background: #e0f7fa; color: #006064; border-left: 3px solid #00bcd4; }
         .position-text { font-size: 0.85em; opacity: 0.8; }
         
-        /* Loading & Messages */
         .loading { text-align: center; padding: 40px; color: #666; font-style: italic; }
         .error { text-align: center; padding: 20px; color: #dc3545; background: #f8d7da; border-radius: 6px; }
     </style>
@@ -106,7 +105,7 @@
         // =========================================================================
         // URL API จาก Google Apps Script ล่าสุดที่คุณให้มา
         // =========================================================================
-        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxCHo2_x-8E8FYvI9EWohxk1HTQRlAUOsAVZwAMOcF92qo1693Do4ysJqrhLtZw4qt4AA/exec';
+        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbzGOnO-Z4Uw1xR0Ks5pme8PI7_uYF0AylucNnXDMDzW0rzlZkp7xjWJNAR9DTZvY-TUDQ/exec';
         
         const API_STATUS = `${GAS_BASE_URL}?sheet=Status`;
         const API_CALENDAR = `${GAS_BASE_URL}?sheet=Schedule`;
@@ -126,14 +125,15 @@
         }
 
         // =========================================================================
-        // ฟังก์ชัน TAB 1: กระดานสถานะวันนี้ (พร้อมระบบอัตโนมัติ)
+        // ฟังก์ชัน TAB 1: ดึงข้อมูลและประมวลผลสถานะอัตโนมัติ
         // =========================================================================
         async function loadStatusData() {
             const board = document.getElementById('statusBoard');
             try {
+                // โหลดข้อมูล Status และ Schedule พร้อมกัน
                 const [statusRes, calendarRes] = await Promise.all([
-                    fetch(API_STATUS),
-                    fetch(API_CALENDAR)
+                    fetch(API_STATUS, { redirect: 'follow' }),
+                    fetch(API_CALENDAR, { redirect: 'follow' })
                 ]);
                 
                 const statusData = await statusRes.json();
@@ -141,18 +141,20 @@
                 
                 if(statusData.error) throw new Error(statusData.error);
                 
+                // หาวันที่ปัจจุบัน (รูปแบบ YYYY-MM-DD)
                 const today = new Date();
                 const year = today.getFullYear();
                 const month = String(today.getMonth() + 1).padStart(2, '0');
                 const day = String(today.getDate()).padStart(2, '0');
                 const todayString = `${year}-${month}-${day}`;
                 
-                // เช็ควันหยุดสุดสัปดาห์ (0=อาทิตย์, 6=เสาร์)
+                // เช็คว่าเป็นวันหยุดเสาร์-อาทิตย์หรือไม่
                 const isWeekend = (today.getDay() === 0 || today.getDay() === 6);
                 
+                // ดึงคิวงานของ "วันนี้" จากปฏิทิน
                 const todaysEvents = calendarData.filter(e => e.date === todayString);
                 
-                // เช็คสถานะ ผอ. ฑิราณี (จากปฏิทิน หรือ กดเปลี่ยนในหน้าสถานะ)
+                // --- ตรวจสอบสถานะ ผอ. ฑิราณี (เช็คจากปฏิทิน + การกดอัปเดตมือ) ---
                 const dirCalendarAbsent = todaysEvents.some(e => e.name && e.name.includes('ฑิราณี') && e.type === 'absent');
                 const dirManualStatus = statusData.find(p => p.Name && p.Name.includes('ฑิราณี'))?.Status;
                 const isDirectorAbsent = dirCalendarAbsent || (dirManualStatus === 'ไม่อยู่' || dirManualStatus === 'ลา');
@@ -162,18 +164,19 @@
                 statusData.forEach(person => {
                     if(!person.Name) return; 
 
+                    // ถ้าฐานข้อมูลว่างเปล่า ให้ถือว่า "อยู่" ไว้ก่อน
                     let currentStatus = person.Status || 'อยู่'; 
-                    let displayStatus = currentStatus;
+                    let displayStatus = currentStatus; 
                     let statusClass = 'status-in';
                     let isAuto = false;
 
-                    // เงื่อนไขที่ 1: วันเสาร์-อาทิตย์
+                    // --- เริ่มเช็คเงื่อนไข ---
                     if (isWeekend) {
                         displayStatus = 'วันหยุดเสาร์-อาทิตย์';
                         statusClass = 'status-leave';
                         isAuto = true;
                     } else {
-                        // เงื่อนไขที่ 2: ดึงคิวจากปฏิทิน (ถ้ามี)
+                        // ค้นหาว่าคนๆ นี้มีคิวในปฏิทินวันนี้ไหม
                         const myEvent = todaysEvents.find(e => e.name && (e.name.includes(person.Name) || person.Name.includes(e.name)));
                         
                         if (myEvent) {
@@ -189,7 +192,7 @@
                             else if(currentStatus === 'ลา') statusClass = 'status-leave';
                         }
 
-                        // กฎพิเศษ 1: ผอ. ฑิราณี (ผู้มีอำนาจลงนาม)
+                        // กฎ 1: ผู้อำนวยการ ฑิราณี
                         if (person.Name.includes('ฑิราณี')) {
                             if (!isDirectorAbsent && currentStatus === 'อยู่') {
                                 displayStatus = 'อยู่ (ผู้มีอำนาจลงนาม)';
@@ -197,21 +200,21 @@
                             }
                         }
 
-                        // กฎพิเศษ 2: รักษาราชการแทน ทนงศักดิ์
+                        // กฎ 2: รักษาราชการแทน ทนงศักดิ์ (ถ้า ผอ.ไม่อยู่)
                         if (person.Name.includes('ทนงศักดิ์') && isDirectorAbsent) {
                             if (!myEvent || myEvent.type !== 'absent') {
                                 if (currentStatus !== 'ไม่อยู่' && currentStatus !== 'ลา') {
                                     displayStatus = 'รักษาราชการแทน ผอ.';
                                     statusClass = 'status-acting';
-                                    isAuto = true; // ล็อกปุ่มไว้เลย
+                                    isAuto = true;
                                 }
                             }
                         }
                     }
 
-                    // สร้างปุ่มอัปเดต หรือ ข้อความระบบอัตโนมัติ
+                    // สร้างปุ่มอัปเดต (ซ่อนไว้ถ้าเป็นระบบอัตโนมัติ)
                     const actionHTML = isAuto ? 
-                        `<span class="auto-text">(ระบบอัตโนมัติ)</span>` :
+                        `<span class="auto-text">(อัปเดตอัตโนมัติ)</span>` :
                         `<select id="select-${person.ID}">
                             <option value="อยู่" ${currentStatus === 'อยู่' ? 'selected' : ''}>อยู่</option>
                             <option value="ไม่อยู่" ${currentStatus === 'ไม่อยู่' ? 'selected' : ''}>ไม่อยู่</option>
@@ -236,10 +239,13 @@
                     `;
                 });
             } catch (error) {
-                board.innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message} <br><small>กรุณาตรวจสอบการตั้งค่าสิทธิ์ Apps Script เป็น "ทุกคน (Anyone)"</small></div>`;
+                board.innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</div>`;
             }
         }
 
+        // =========================================================================
+        // ฟังก์ชันอัปเดตสถานะกลับไปที่ Google Sheets
+        // =========================================================================
         async function updateStatus(id) {
             const newStatus = document.getElementById(`select-${id}`).value;
             const badge = document.getElementById(`badge-${id}`);
@@ -252,7 +258,8 @@
                 const response = await fetch(GAS_BASE_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ id: id, status: newStatus })
+                    body: JSON.stringify({ id: id, status: newStatus }),
+                    redirect: 'follow'
                 });
                 const result = await response.json();
                 
@@ -278,7 +285,7 @@
 
         async function loadCalendarData() {
             try {
-                const response = await fetch(API_CALENDAR);
+                const response = await fetch(API_CALENDAR, { redirect: 'follow' });
                 calendarData = await response.json();
                 if(calendarData.error) throw new Error(calendarData.error);
                 renderCalendar();
