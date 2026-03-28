@@ -1,117 +1,14 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสารสนเทศบุคลากร - โครงการ วมว. มน.</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #f37021;
-            --secondary-color: #0056b3;
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-        }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-color); }
-        
-        /* Navbar & Tabs */
-        .navbar { background-color: white; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .navbar h1 { margin: 0; font-size: 1.5em; color: var(--secondary-color); }
-        .tab-buttons button { padding: 10px 20px; font-family: 'Sarabun', sans-serif; font-size: 1em; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; font-weight: 600; color: #666; }
-        .tab-buttons button:hover { color: var(--secondary-color); }
-        .tab-buttons button.active { color: var(--secondary-color); border-bottom: 3px solid var(--secondary-color); }
-
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        .tab-content { display: none; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- Styles สำหรับหน้ากระดานสถานะ --- */
-        .person-card { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; transition: background 0.2s; }
-        .person-card:hover { background-color: #fafafa; }
-        .info { flex-grow: 1; }
-        .name { font-size: 1.2em; font-weight: bold; }
-        .role { color: #666; font-size: 0.9em; }
-        
-        .status-badge { padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; display: inline-block; min-width: 60px; text-align: center; }
-        .status-in { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-out { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .status-meeting { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .status-leave { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
-        .status-acting { background-color: #f3e5f5; color: #4a148c; border: 1px solid #7b1fa2; }
-        
-        .action-area { display: flex; align-items: center; gap: 10px; margin-left: 20px; justify-content: flex-end; min-width: 200px; }
-        .action-area select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-family: 'Sarabun', sans-serif; }
-        .btn-update { padding: 8px 15px; background-color: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Sarabun', sans-serif; transition: background 0.2s; }
-        .btn-update:hover { background-color: #004494; }
-        .auto-text { color: #999; font-size: 0.85em; font-style: italic; }
-
-        /* --- Styles สำหรับหน้าปฏิทิน --- */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .calendar-controls button { padding: 8px 15px; background: white; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-family: 'Sarabun', sans-serif; }
-        .calendar-controls button:hover { background: #f0f0f0; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        .day-name { text-align: center; font-weight: 600; padding: 10px 0; background: var(--secondary-color); color: white; border-radius: 6px; }
-        .day-cell { min-height: 120px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; }
-        .day-cell:hover { border-color: #bbb; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .day-number { font-weight: bold; text-align: right; margin-bottom: 8px; color: #555; }
-        .empty-cell { background: transparent; border: none; box-shadow: none; }
-        
-        .event { font-size: 0.8em; padding: 5px 8px; border-radius: 4px; margin-bottom: 5px; line-height: 1.3; cursor: pointer; }
-        .event-absent { background: #ffebee; color: #c62828; border-left: 3px solid #d32f2f; }
-        .event-acting { background: #f3e5f5; color: #4a148c; border-left: 3px solid #7b1fa2; font-weight: 600; }
-        .event-meeting { background: #fff8e1; color: #f57f17; border-left: 3px solid #ffb300; }
-        .event-work { background: #e0f7fa; color: #006064; border-left: 3px solid #00bcd4; }
-        .position-text { font-size: 0.85em; opacity: 0.8; }
-        
-        .loading { text-align: center; padding: 40px; color: #666; font-style: italic; }
-        .error { text-align: center; padding: 20px; color: #dc3545; background: #f8d7da; border-radius: 6px; }
-    </style>
-</head>
-<body>
-
-    <div class="navbar">
-        <h1>ระบบสารสนเทศ โครงการ วมว. มน.</h1>
-        <div class="tab-buttons">
-            <button class="active" onclick="switchTab('statusTab')" id="btn-statusTab">กระดานสถานะวันนี้</button>
-            <button onclick="switchTab('calendarTab')" id="btn-calendarTab">ปฏิทินปฏิบัติงาน</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <div id="statusTab" class="tab-content active">
-            <h2 style="margin-top: 0; color: var(--secondary-color);">สถานะผู้บริหารและเจ้าหน้าที่</h2>
-            <div id="statusBoard">
-                <div class="loading">กำลังโหลดข้อมูล...</div>
-            </div>
-        </div>
-
-        <div id="calendarTab" class="tab-content">
-            <div class="calendar-header">
-                <h2 style="margin: 0; color: var(--secondary-color);">ปฏิทินปฏิบัติงาน และผู้รักษาราชการแทน</h2>
-                <div class="calendar-controls">
-                    <h3 id="monthYearDisplay" style="display:inline; margin-right: 15px;">กำลังโหลด...</h3>
-                    <button onclick="changeMonth(-1)">&#8592; เดือนก่อนหน้า</button>
-                    <button onclick="changeMonth(1)">เดือนถัดไป &#8594;</button>
-                </div>
-            </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <div style="grid-column: 1 / -1;" class="loading">กำลังโหลดข้อมูลปฏิทิน...</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
+<script>
         // =========================================================================
-        // URL API จาก Google Apps Script ล่าสุดที่คุณให้มา
+        // 🔴 นำ URL ที่ได้จากการ Deploy ด้วย Gmail ส่วนตัว มาใส่ตรงนี้ครับ 🔴
         // =========================================================================
-        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbzpmTU0gVdSaIihK_rJS4eEUISmihzy3X4s680lA4gFfUy_cuhsvWkFiqDsiR3JJFgbSQ/exec';
+        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbwKYwZlUbOrtlrPnTEpKAtRZQ2uV4qoZceFCv1tfoAkpViE5vAaWMThDrFs4Txlshil/exec'; 
         
         const API_STATUS = `${GAS_BASE_URL}?sheet=Status`;
         const API_CALENDAR = `${GAS_BASE_URL}?sheet=Schedule`;
 
         // =========================================================================
-        // ระบบ Tab Navigation
+        // 1. ระบบ Tab Navigation
         // =========================================================================
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -125,7 +22,7 @@
         }
 
         // =========================================================================
-        // ฟังก์ชัน TAB 1: ดึงข้อมูลและประมวลผลสถานะอัตโนมัติ
+        // 2. ฟังก์ชัน TAB 1: ดึงข้อมูลและประมวลผลสถานะอัตโนมัติ (เงื่อนไข ฑิราณี & ทนงศักดิ์)
         // =========================================================================
         async function loadStatusData() {
             const board = document.getElementById('statusBoard');
@@ -148,35 +45,41 @@
                 const day = String(today.getDate()).padStart(2, '0');
                 const todayString = `${year}-${month}-${day}`;
                 
-                // เช็คว่าเป็นวันหยุดเสาร์-อาทิตย์หรือไม่
+                // เช็คว่าเป็นวันหยุดเสาร์-อาทิตย์หรือไม่ (0 = อาทิตย์, 6 = เสาร์)
                 const isWeekend = (today.getDay() === 0 || today.getDay() === 6);
                 
                 // ดึงคิวงานของ "วันนี้" จากปฏิทิน
                 const todaysEvents = calendarData.filter(e => e.date === todayString);
                 
-                // --- ตรวจสอบสถานะ ผอ. ฑิราณี (เช็คจากปฏิทิน + การกดอัปเดตมือ) ---
+                // --- ตรวจสอบสถานะ ผอ. ฑิราณี ---
+                // เช็คจากปฏิทินว่ามีคิวไปราชการ/ลา หรือไม่
                 const dirCalendarAbsent = todaysEvents.some(e => e.name && e.name.includes('ฑิราณี') && e.type === 'absent');
+                // เช็คจากหน้าสถานะวันนี้ ว่ามีคนกดเป็น ไม่อยู่/ลา หรือไม่
                 const dirManualStatus = statusData.find(p => p.Name && p.Name.includes('ฑิราณี'))?.Status;
+                
+                // สรุปว่า ผอ. ไม่อยู่ใช่หรือไม่? (เข้าเงื่อนไขใดเงื่อนไขหนึ่ง ถือว่าไม่อยู่)
                 const isDirectorAbsent = dirCalendarAbsent || (dirManualStatus === 'ไม่อยู่' || dirManualStatus === 'ลา');
 
                 board.innerHTML = '';
                 
                 statusData.forEach(person => {
-                    if(!person.Name) return; 
+                    if(!person.Name) return; // ข้ามแถวว่าง
 
-                    // ถ้าฐานข้อมูลว่างเปล่า ให้ถือว่า "อยู่" ไว้ก่อน
+                    // ถ้ายังไม่มีการอัปเดต ให้ถือว่า "อยู่" ไว้ก่อน
                     let currentStatus = person.Status || 'อยู่'; 
                     let displayStatus = currentStatus; 
                     let statusClass = 'status-in';
                     let isAuto = false;
 
-                    // --- เริ่มเช็คเงื่อนไข ---
+                    // --- เริ่มเช็คเงื่อนไขเรียงตามลำดับความสำคัญ ---
+                    
                     if (isWeekend) {
+                        // 1. ถ้าเป็นเสาร์-อาทิตย์ ให้ทุกคนขึ้นวันหยุด
                         displayStatus = 'วันหยุดเสาร์-อาทิตย์';
                         statusClass = 'status-leave';
                         isAuto = true;
                     } else {
-                        // ค้นหาว่าคนๆ นี้มีคิวในปฏิทินวันนี้ไหม
+                        // 2. ค้นหาว่าคนๆ นี้มีคิวในปฏิทินวันนี้ไหม
                         const myEvent = todaysEvents.find(e => e.name && (e.name.includes(person.Name) || person.Name.includes(e.name)));
                         
                         if (myEvent) {
@@ -186,33 +89,36 @@
                             if(myEvent.type === 'acting') statusClass = 'status-acting';
                             isAuto = true;
                         } else {
+                            // จัดสีตามสถานะปกติที่กดมือ
                             if(currentStatus === 'อยู่') statusClass = 'status-in';
                             else if(currentStatus === 'ไม่อยู่') statusClass = 'status-out';
                             else if(currentStatus === 'ประชุม') statusClass = 'status-meeting';
                             else if(currentStatus === 'ลา') statusClass = 'status-leave';
                         }
 
-                        // กฎ 1: ผู้อำนวยการ ฑิราณี
+                        // 🌟 กฎพิเศษ: ผู้อำนวยการ ฑิราณี
                         if (person.Name.includes('ฑิราณี')) {
+                            // ถ้า ผอ. ไม่ได้ไม่อยู่ และสถานะปัจจุบันคือ "อยู่"
                             if (!isDirectorAbsent && currentStatus === 'อยู่') {
                                 displayStatus = 'อยู่ (ผู้มีอำนาจลงนาม)';
                                 statusClass = 'status-in';
                             }
                         }
 
-                        // กฎ 2: รักษาราชการแทน ทนงศักดิ์ (ถ้า ผอ.ไม่อยู่)
+                        // 🌟 กฎพิเศษ: รักษาราชการแทน ทนงศักดิ์
                         if (person.Name.includes('ทนงศักดิ์') && isDirectorAbsent) {
+                            // เช็คเพื่อความชัวร์ว่าอาจารย์ทนงศักดิ์ไม่ได้ลาซะเอง
                             if (!myEvent || myEvent.type !== 'absent') {
                                 if (currentStatus !== 'ไม่อยู่' && currentStatus !== 'ลา') {
                                     displayStatus = 'รักษาราชการแทน ผอ.';
                                     statusClass = 'status-acting';
-                                    isAuto = true;
+                                    isAuto = true; // ล็อกสถานะไว้เป็นอัตโนมัติ
                                 }
                             }
                         }
                     }
 
-                    // สร้างปุ่มอัปเดต (ซ่อนไว้ถ้าเป็นระบบอัตโนมัติ)
+                    // สร้างปุ่มอัปเดต (ซ่อนปุ่มไว้ถ้าเป็นระบบอัตโนมัติ)
                     const actionHTML = isAuto ? 
                         `<span class="auto-text">(อัปเดตอัตโนมัติ)</span>` :
                         `<select id="select-${person.ID}">
@@ -223,6 +129,7 @@
                         </select>
                         <button class="btn-update" onclick="updateStatus('${person.ID}')">บันทึก</button>`;
 
+                    // วาดการ์ดแสดงผล
                     board.innerHTML += `
                         <div class="person-card">
                             <div class="info">
@@ -244,7 +151,7 @@
         }
 
         // =========================================================================
-        // ฟังก์ชันอัปเดตสถานะกลับไปที่ Google Sheets
+        // 3. ฟังก์ชันอัปเดตสถานะกลับไปที่ Google Sheets (เวลากดปุ่มบันทึก)
         // =========================================================================
         async function updateStatus(id) {
             const newStatus = document.getElementById(`select-${id}`).value;
@@ -264,7 +171,7 @@
                 const result = await response.json();
                 
                 if(result.status === 'success') {
-                    loadStatusData(); 
+                    loadStatusData(); // โหลดใหม่เพื่ออัปเดตสถานะที่เปลี่ยนไป
                 } else {
                     alert('เกิดข้อผิดพลาด: ' + result.message);
                     badge.innerText = originalText;
@@ -276,7 +183,7 @@
         }
 
         // =========================================================================
-        // ฟังก์ชัน TAB 2: ปฏิทินปฏิบัติงาน
+        // 4. ฟังก์ชัน TAB 2: โหลดและแสดงผลปฏิทินปฏิบัติงาน
         // =========================================================================
         let currentDate = new Date(); 
         let calendarData = [];
@@ -354,5 +261,3 @@
         loadStatusData(); 
 
     </script>
-</body>
-</html>
