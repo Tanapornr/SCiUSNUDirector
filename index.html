@@ -14,24 +14,20 @@
         .tab-btn.active { color: var(--secondary); border-bottom-color: var(--secondary); }
         .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; }
-        
         .table-responsive { overflow-x: auto; margin-top: 20px; border-radius: 10px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #f1f3f5; color: #495057; padding: 15px; text-align: center; border: 1px solid #dee2e6; font-size: 0.9em; }
         td { padding: 15px; text-align: center; border: 1px solid #dee2e6; vertical-align: middle; transition: 0.2s; }
         .name-col { text-align: left; min-width: 220px; font-weight: 600; background: #fff; position: sticky; left: 0; z-index: 10; border-right: 2px solid #dee2e6; }
-        
         .check-in { color: var(--success); font-size: 1.5em; }
         .status-absent { color: #dc3545; font-size: 0.85em; font-weight: bold; background: #fff5f5; padding: 8px; border-radius: 8px; display: block; border: 1px solid #ffdada; line-height: 1.4; }
         .status-acting { color: #6f42c1; font-size: 0.85em; font-weight: bold; background: #f8f0ff; padding: 8px; border-radius: 8px; display: block; border: 1px solid #e0cffc; line-height: 1.4; }
         .today-mark { background: #fff9f0 !important; border: 2px solid var(--primary) !important; font-weight: bold; }
-
         .form-group { margin-bottom: 20px; }
         label { font-weight: 600; color: #444; }
         input, select, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 10px; border: 1px solid #ddd; font-family: 'Sarabun'; font-size: 1em; }
         button { background: var(--secondary); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
         button:hover { background: #004494; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,86,179,0.3); }
-        
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .cal-day { background: white; border: 1px solid #eee; min-height: 90px; padding: 8px; border-radius: 8px; }
         #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); display:flex; justify-content:center; align-items:center; z-index:9999; display:none; }
@@ -105,7 +101,11 @@
 </div>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzob9eGSpJqS6xbAKMF1cmL9mGjXib_92eqs-N7t5QvnW-TsJPt921a8SmUgAGtYR1-ew/exec';
+    // 🔴 1. ตรวจสอบลิงก์นี้ให้ชัวร์ว่าเป็นเวอร์ชันล่าสุดที่ Deploy เป็น "ทุกคน (Anyone)"
+    const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbyk89WDR9pyW6SpeGrx5pz89MtGaRnXIh3oKmwoouIJ-KMsRSa9ntjnk9_fV_7muupZTQ/exec';
+    
+    const API_URL_STATUS = `${GAS_BASE_URL}?sheet=Status`;
+    const API_URL_SCHEDULE = `${GAS_BASE_URL}?sheet=Schedule`;
 
     let rawStatus = [];
     let rawSchedule = [];
@@ -115,40 +115,52 @@
         document.getElementById('loader').style.display = 'flex';
         try {
             const [res1, res2] = await Promise.all([
-                fetch(API_URL + '?sheet=Status'),
-                fetch(API_URL + '?sheet=Schedule')
+                fetch(API_URL_STATUS, { redirect: 'follow' }),
+                fetch(API_URL_SCHEDULE, { redirect: 'follow' })
             ]);
+            
+            if (!res1.ok || !res2.ok) throw new Error('Network response was not ok');
+
             rawStatus = await res1.json();
             rawSchedule = await res2.json();
+            
+            if (rawStatus.error || rawSchedule.error) {
+                throw new Error(rawStatus.error || rawSchedule.error);
+            }
+
             renderHome();
             renderCalendar();
             populateAdminSelect();
         } catch (e) {
-            Swal.fire('Error', 'ไม่สามารถเชื่อมต่อข้อมูลได้', 'error');
+            console.error("Fetch Error:", e);
+            Swal.fire('การเชื่อมต่อล้มเหลว', 'ตรวจสอบการ Deploy หรือชื่อ Sheet<br>Error: ' + e.message, 'error');
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
+    }
+
+    function normalizeDate(dateInput) {
+        if (!dateInput) return null;
+        const d = new Date(dateInput);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
     }
 
     function showTab(id, event) {
         document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).style.display = 'block';
-        event.currentTarget.classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
     }
 
     function renderHome() {
         const headerRow = document.getElementById('tableHeader');
         const body = document.getElementById('tableBody');
         const dates = [];
-        
-        // --- ส่วนที่ปรับปรุง: คัดเลือกเฉพาะวันทำการ (จ-ศ) 5 วันถัดไป ---
         let tempDate = new Date();
         while (dates.length < 5) {
             let day = tempDate.getDay();
-            if (day !== 0 && day !== 6) { // 0=อาทิตย์, 6=เสาร์
-                dates.push(new Date(tempDate));
-            }
+            if (day !== 0 && day !== 6) { dates.push(new Date(tempDate)); }
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
@@ -161,21 +173,25 @@
         body.innerHTML = '';
         rawStatus.forEach(person => {
             let row = `<tr><td class="name-col">${person.Name}<br><small style="color:#888">${person.Role}</small></td>`;
-            
             dates.forEach((date, idx) => {
-                const dateISO = date.toISOString().split('T')[0];
-                const schedule = rawSchedule.find(s => dateISO >= s.StartDate && dateISO <= s.EndDate && s.Name.includes(person.Name));
-                const isDirAbsent = rawSchedule.some(s => dateISO >= s.StartDate && dateISO <= s.EndDate && s.Name.includes('ฑิราณี'));
-
+                const targetTime = normalizeDate(date);
+                const schedule = rawSchedule.find(s => {
+                    const start = normalizeDate(s.StartDate);
+                    const end = normalizeDate(s.EndDate);
+                    return targetTime >= start && targetTime <= end && s.Name.trim() === person.Name.trim();
+                });
+                const isDirAbsent = rawSchedule.some(s => {
+                    const start = normalizeDate(s.StartDate);
+                    const end = normalizeDate(s.EndDate);
+                    return targetTime >= start && targetTime <= end && s.Name.includes('ฑิราณี');
+                });
                 let content = '<span class="check-in">✅</span>';
                 let cellClass = idx === 0 ? 'today-mark' : '';
-
                 if (schedule) {
-                    content = `<span class="status-absent">ไม่อยู่<br>(${schedule.Reason})</span>`;
+                    content = `<span class="status-absent">ไม่อยู่<br><small>(${schedule.Reason})</small></span>`;
                 } else if (person.Name.includes('ทนงศักดิ์') && isDirAbsent) {
                     content = `<span class="status-acting">รักษาราชการแทน ผอ.</span>`;
                 }
-                
                 row += `<td class="${cellClass}">${content}</td>`;
             });
             body.innerHTML += row + '</tr>';
@@ -189,14 +205,18 @@
         const year = viewDate.getFullYear();
         const month = viewDate.getMonth();
         monthYear.innerText = new Intl.DateTimeFormat('th-TH', { month:'long', year:'numeric' }).format(viewDate);
-        
         ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div style="text-align:center; padding:10px; font-weight:bold; font-size:0.9em; color:#666;">${d}</div>`);
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         for(let i=0; i<firstDay; i++) grid.innerHTML += `<div></div>`;
         for(let d=1; d<=daysInMonth; d++) {
             const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const events = rawSchedule.filter(s => dStr >= s.StartDate && dStr <= s.EndDate);
+            const events = rawSchedule.filter(s => {
+                const start = normalizeDate(s.StartDate);
+                const end = normalizeDate(s.EndDate);
+                const current = normalizeDate(dStr);
+                return current >= start && current <= end;
+            });
             let eHtml = events.map(e => `<div style="color:#dc3545; font-size:9px; margin-top:3px; border-left:2px solid #dc3545; padding-left:3px;">${e.Name.split(' ')[1]} ลา</div>`).join('');
             grid.innerHTML += `<div class="cal-day"><strong>${d}</strong>${eHtml}</div>`;
         }
@@ -216,20 +236,16 @@
             endDate: document.getElementById('endDate').value,
             reason: document.getElementById('reason').value
         };
-
         if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
-
-        btn.disabled = true;
-        btn.innerText = 'กำลังบันทึก...';
-
+        btn.disabled = true; btn.innerText = 'กำลังบันทึก...';
         try {
-            await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
+            await fetch(GAS_BASE_URL, { method:'POST', body: JSON.stringify(data) });
             Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500 });
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('reason').value = '';
             await loadAllData();
-            showTab('home', { currentTarget: document.querySelector('.tab-btn') });
+            showTab('home');
         } catch (e) { Swal.fire('Error', 'ลองใหม่อีกครั้ง', 'error'); } 
         finally { btn.disabled = false; btn.innerText = 'บันทึกข้อมูลตารางเวลา'; }
     }
