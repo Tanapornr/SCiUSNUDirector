@@ -18,7 +18,6 @@
             background-color: var(--ios-bg); 
             color: #000;
         }
-        /* iOS Glassmorphism */
         .glass-nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: saturate(180%) blur(20px);
@@ -29,47 +28,50 @@
             border-radius: 12px;
         }
         .tab-active {
-            background-color: rgba(0, 122, 255, 0.1);
+            background-color: white;
             color: var(--ios-blue) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .ios-card {
             background: var(--ios-card);
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
         }
-        /* Sticky Column for iOS feel */
         .sticky-col {
             position: sticky;
             left: 0;
             background: #fff;
             z-index: 20;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.02);
+            border-right: 1px solid #F2F2F7;
         }
         .today-highlight {
             background-color: rgba(0, 122, 255, 0.03) !important;
         }
-        /* Hide scrollbar but keep functionality */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        input, select {
-            -webkit-appearance: none;
-            outline: none;
+        /* สัญลักษณ์ iOS Clickable */
+        .symbol-btn {
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .symbol-btn:active {
+            transform: scale(0.85);
         }
     </style>
 </head>
 <body class="pb-10">
 
-    <header class="glass-nav sticky top-0 z-50 border-b border-gray-200">
-        <div class="max-w-6xl mx-auto px-5 flex justify-between items-center h-16">
+    <header class="glass-nav sticky top-0 z-50 border-b border-gray-200/50">
+        <div class="max-w-6xl mx-auto px-5 flex justify-between items-center h-20">
             <div class="flex flex-col">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] leading-none">SCiUS Naresuan</span>
-                <h1 class="text-lg font-bold text-black leading-tight">คณะผู้บริหาร</h1>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Executive Center</span>
+                <h1 class="text-xl font-extrabold text-black">คณะผู้บริหาร</h1>
             </div>
-            <div class="flex bg-gray-100/80 p-1 rounded-xl">
-                <button id="btn-home" onclick="showTab('home')" class="tab-btn px-4 py-1.5 text-sm font-semibold text-gray-500 tab-active">สถานะ</button>
-                <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-4 py-1.5 text-sm font-semibold text-gray-500">ปฏิทิน</button>
-                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-4 py-1.5 text-sm font-semibold text-gray-500">จัดการ</button>
+            <div class="flex bg-gray-200/50 p-1 rounded-2xl w-fit">
+                <button id="btn-home" onclick="showTab('home')" class="tab-btn px-4 py-2 text-sm font-bold text-gray-500 tab-active">สถานะ</button>
+                <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-4 py-2 text-sm font-bold text-gray-500">ปฏิทิน</button>
+                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-4 py-2 text-sm font-bold text-gray-500">จัดการ</button>
             </div>
         </div>
     </header>
@@ -77,72 +79,79 @@
     <main class="max-w-6xl mx-auto px-5 mt-8">
         
         <div id="tab-home" class="tab-content transition-opacity duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold tracking-tight text-black">แผนปฏิบัติงาน 5 วัน</h2>
-                <button onclick="loadAllData()" class="text-blue-500 font-medium text-sm">รีเฟรช</button>
+            <div class="flex items-end justify-between mb-6 px-2">
+                <div>
+                    <h2 class="text-2xl font-extrabold tracking-tight text-black">แผนปฏิบัติงาน</h2>
+                    <p class="text-xs font-bold text-blue-500 uppercase">5 วันทำการล่วงหน้า</p>
+                </div>
+                <button onclick="loadAllData()" class="text-blue-500 font-bold text-sm bg-blue-50 px-4 py-2 rounded-full">อัปเดต</button>
             </div>
             
             <div class="ios-card overflow-hidden">
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full border-collapse">
                         <thead>
-                            <tr id="tableHeader" class="bg-gray-50/50 text-[11px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100"></tr>
+                            <tr id="tableHeader" class="bg-gray-50/30 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100"></tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-gray-50"></tbody>
                     </table>
                 </div>
             </div>
-            <p class="mt-4 text-[11px] text-gray-400 text-center px-4">ระบบคำนวณสถานะรักษาราชการแทนอัตโนมัติเมื่อท่านผู้อำนวยการไม่อยู่ปฏิบัติหน้าที่</p>
+            <div class="mt-6 p-4 ios-card bg-blue-50/50 border border-blue-100">
+                <p class="text-[11px] text-blue-600 leading-relaxed font-semibold">
+                    💡 **คำแนะนำ:** คลิกที่สัญลักษณ์ <span class="text-red-500">❌</span> เพื่อตรวจสอบรายละเอียดการไปราชการหรือการลาของคณะผู้บริหาร
+                </p>
+            </div>
         </div>
 
         <div id="tab-calendar" class="tab-content hidden">
             <div class="ios-card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <button onclick="changeMonth(-1)" class="text-blue-500 font-bold p-2">◀</button>
-                    <h2 id="calMonthYear" class="text-xl font-bold text-black"></h2>
-                    <button onclick="changeMonth(1)" class="text-blue-500 font-bold p-2">▶</button>
+                <div class="flex justify-between items-center mb-8 px-2">
+                    <button onclick="changeMonth(-1)" class="text-blue-500 font-black text-xl bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center">‹</button>
+                    <h2 id="calMonthYear" class="text-xl font-extrabold text-black"></h2>
+                    <button onclick="changeMonth(1)" class="text-blue-500 font-black text-xl bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center">›</button>
                 </div>
-                <div class="grid grid-cols-7 gap-2" id="calendarGrid"></div>
+                <div class="grid grid-cols-7 gap-3" id="calendarGrid"></div>
             </div>
         </div>
 
         <div id="tab-admin" class="tab-content hidden">
             <div class="max-w-md mx-auto ios-card p-8">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-black">ลงข้อมูลล่วงหน้า</h2>
-                    <p class="text-sm text-gray-400">ระบุช่วงวันที่ที่คณะผู้บริหารไม่อยู่</p>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-extrabold text-black">ลงข้อมูลล่วงหน้า</h2>
+                    <p class="text-sm font-bold text-gray-400 uppercase">Executive Schedule Management</p>
                 </div>
-                <div class="space-y-5">
+                <div class="space-y-6">
                     <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase px-1">ผู้บริหาร</label>
-                        <select id="adminNameSelect" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500/20"></select>
+                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1">ผู้บริหาร</label>
+                        <select id="adminNameSelect" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold"></select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase px-1">ตั้งแต่วันที่</label>
-                            <input type="date" id="startDate" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none">
+                            <label class="text-[10px] font-black text-gray-400 uppercase ml-1">จากวันที่</label>
+                            <input type="date" id="startDate" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase px-1">ถึงวันที่</label>
-                            <input type="date" id="endDate" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none">
+                            <label class="text-[10px] font-black text-gray-400 uppercase ml-1">ถึงวันที่</label>
+                            <input type="date" id="endDate" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase px-1">เหตุผล (เช่น ไปราชการ)</label>
-                        <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none">
+                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1">รายละเอียด (ไปที่ไหน/ลาประเภทใด)</label>
+                        <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold">
                     </div>
-                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-[#007AFF] hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 transition-all active:scale-95">
-                        บันทึกข้อมูล
+                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-[#007AFF] hover:bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95">
+                        ยืนยันการบันทึกข้อมูล
                     </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="loader" class="fixed inset-0 bg-white/60 backdrop-blur-md z-[100] flex items-center justify-center hidden">
+    <div id="loader" class="fixed inset-0 bg-white/70 backdrop-blur-xl z-[100] flex items-center justify-center hidden">
         <div class="flex flex-col items-center">
-            <div class="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="mt-4 text-xs font-bold text-blue-500 uppercase tracking-widest">กำลังโหลด</span>
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="mt-4 text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Syncing Hub</span>
         </div>
     </div>
 
@@ -151,7 +160,7 @@
 
         let rawStatus = [];
         let rawSchedule = [];
-        let viewDate = new Date();
+        let viewDate = new Date(2026, 2, 30); // เริ่มต้นที่ มีนาคม 2569
 
         async function loadAllData() {
             document.getElementById('loader').classList.remove('hidden');
@@ -166,7 +175,7 @@
                 renderCalendar();
                 populateAdminSelect();
             } catch (e) {
-                Swal.fire('Error', 'ไม่สามารถเชื่อมต่อได้', 'error');
+                Swal.fire('Error', 'ไม่สามารถเข้าถึงข้อมูลคณะผู้บริหารได้', 'error');
             } finally {
                 document.getElementById('loader').classList.add('hidden');
             }
@@ -186,31 +195,64 @@
             return date.getTime();
         }
 
+        // ฟังก์ชันแสดงป๊อปอัพข้อมูลการลา
+        function showAbsenceDetail(name, reason, start, end) {
+            const sDate = new Date(start).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+            const eDate = new Date(end).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            Swal.fire({
+                title: `<span class="text-lg font-bold">ข้อมูลการปฏิบัติหน้าที่</span>`,
+                html: `
+                    <div class="text-left space-y-3 mt-4">
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase">ผู้บริหาร</p>
+                            <p class="text-sm font-bold text-gray-800">${name}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase">รายละเอียด</p>
+                            <p class="text-sm font-bold text-red-500">${reason}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase">ช่วงเวลา</p>
+                            <p class="text-xs font-bold text-gray-600">${sDate} - ${eDate}</p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#007AFF',
+                customClass: { popup: 'rounded-[24px]' }
+            });
+        }
+
         function renderHome() {
             const header = document.getElementById('tableHeader');
             const body = document.getElementById('tableBody');
             const dates = [];
-            let temp = new Date();
             
+            // ปรับให้เริ่ม 30 มีนาคม 2569 (หรือวันที่ปัจจุบันถ้าผ่านไปแล้ว)
+            let startPoint = new Date(2026, 2, 30);
+            let today = new Date();
+            let temp = (today > startPoint) ? today : startPoint;
+
             while(dates.length < 5) {
                 if(temp.getDay() !== 0 && temp.getDay() !== 6) dates.push(new Date(temp));
                 temp.setDate(temp.getDate() + 1);
             }
 
-            header.innerHTML = '<th class="p-5 sticky-col text-left font-bold text-gray-400">คณะผู้บริหาร</th>';
+            header.innerHTML = '<th class="p-6 sticky-col text-left font-black text-gray-400">Executive</th>';
             dates.forEach((d, idx) => {
                 header.innerHTML += `
-                    <th class="p-5 min-w-[120px] ${idx === 0 ? 'today-highlight' : ''}">
-                        <div class="text-[10px] opacity-60">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
-                        <div class="text-base font-bold text-gray-800">${d.getDate()} ${d.toLocaleDateString('th-TH', {month:'short'})}</div>
+                    <th class="p-6 min-w-[130px] ${idx === 0 ? 'today-highlight' : ''}">
+                        <div class="opacity-40">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
+                        <div class="text-sm font-bold text-gray-800">${d.getDate()} ${d.toLocaleDateString('th-TH', {month:'short'})}</div>
                     </th>`;
             });
 
             body.innerHTML = '';
             rawStatus.forEach(person => {
-                let row = `<tr class="bg-white"><td class="p-5 sticky-col border-b border-gray-50">
+                let row = `<tr class="bg-white"><td class="p-6 sticky-col border-b border-gray-50">
                     <div class="font-bold text-gray-900">${person.Name}</div>
-                    <div class="text-[10px] font-bold text-blue-500 uppercase tracking-tighter">${person.Role}</div>
+                    <div class="text-[9px] font-black text-blue-500 uppercase">${person.Role}</div>
                 </td>`;
                 
                 dates.forEach((date, idx) => {
@@ -218,15 +260,15 @@
                     const schedule = rawSchedule.find(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.trim() === person.Name.trim());
                     const isDirAbsent = rawSchedule.some(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
 
-                    let content = '<div class="text-2xl">✅</div>';
+                    let content = '<div class="text-2xl opacity-20">✅</div>';
 
                     if(schedule) {
-                        content = `<div class="text-2xl">❌</div><div class="text-[9px] font-bold text-red-500 mt-1">${schedule.Reason}</div>`;
+                        content = `<div onclick="showAbsenceDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="symbol-btn text-2xl">❌</div>`;
                     } else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) {
-                        content = `<div class="text-2xl">👑</div><div class="text-[9px] font-bold text-indigo-600 mt-1 leading-none">รักษาราชการแทน</div>`;
+                        content = `<div class="text-2xl">👑</div><div class="text-[8px] font-black text-indigo-600 mt-1 uppercase">Acting</div>`;
                     }
                     
-                    row += `<td class="p-5 text-center border-b border-gray-50 ${idx === 0 ? 'today-highlight' : ''}">${content}</td>`;
+                    row += `<td class="p-6 text-center border-b border-gray-50 ${idx === 0 ? 'today-highlight' : ''}">${content}</td>`;
                 });
                 body.innerHTML += row + '</tr>';
             });
@@ -240,7 +282,7 @@
             const m = viewDate.getMonth();
             monthYear.innerText = new Intl.DateTimeFormat('th-TH', {month:'long', year:'numeric'}).format(viewDate);
             
-            ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-bold text-gray-300 text-[10px] py-2 uppercase tracking-widest">${d}</div>`);
+            ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-black text-gray-300 text-[9px] py-3 uppercase tracking-widest">${d}</div>`);
             
             const first = new Date(y, m, 1).getDay();
             const days = new Date(y, m + 1, 0).getDate();
@@ -252,57 +294,40 @@
                 const isToday = current === normalizeDate(new Date());
                 
                 let peopleList = rawStatus.map(p => {
-                    const absent = rawSchedule.some(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
-                    const shortName = p.Name.split(' ')[1] || p.Name;
-                    return `<div class="flex justify-between items-center text-[8px] mb-0.5 ${absent ? 'opacity-30' : 'font-bold text-gray-700'}">
-                        <span>${shortName}</span>
-                        <span>${absent ? '❌' : '✅'}</span>
+                    const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
+                    const lastName = p.Name.split(' ')[1] || p.Name;
+                    return `<div onclick="${sched ? `showAbsenceDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[8px] mb-1 ${sched ? 'text-red-500 font-bold cursor-pointer' : 'font-bold text-gray-700'}">
+                        <span>${lastName}</span>
+                        <span>${sched ? '❌' : '✅'}</span>
                     </div>`;
                 }).join('');
 
                 grid.innerHTML += `
-                    <div class="min-h-[90px] bg-gray-50/50 border border-gray-100 rounded-xl p-1.5 flex flex-col ${isToday ? 'ring-1 ring-blue-500 bg-blue-50/30' : ''}">
-                        <div class="text-[10px] font-bold mb-1 ${isToday ? 'text-blue-500' : 'text-gray-300'}">${d}</div>
+                    <div class="min-h-[100px] bg-white border border-gray-100 rounded-2xl p-2 flex flex-col ${isToday ? 'ring-2 ring-blue-500' : ''}">
+                        <div class="text-[10px] font-black mb-2 ${isToday ? 'text-blue-500' : 'text-gray-300'}">${d}</div>
                         <div class="flex-1">${peopleList}</div>
                     </div>`;
             }
         }
 
         function changeMonth(s) { viewDate.setMonth(viewDate.getMonth() + s); renderCalendar(); }
-        
         function populateAdminSelect() {
             document.getElementById('adminNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join('');
         }
 
         async function submitAbsence() {
             const btn = document.getElementById('submitBtn');
-            const data = {
-                action: 'addAbsence',
-                name: document.getElementById('adminNameSelect').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                reason: document.getElementById('reason').value
-            };
-
-            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุวันที่และเหตุผล', 'warning');
-
-            btn.disabled = true;
-            btn.innerHTML = 'กำลังบันทึก...';
-
+            const data = { action: 'addAbsence', name: document.getElementById('adminNameSelect').value, startDate: document.getElementById('startDate').value, endDate: document.getElementById('endDate').value, reason: document.getElementById('reason').value };
+            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('Error', 'กรุณาระบุข้อมูลให้ครบถ้วน', 'warning');
+            btn.disabled = true; btn.innerHTML = 'กำลังบันทึก...';
             try {
                 await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
-                Swal.fire({ title: 'สำเร็จ', text: 'บันทึกข้อมูลแล้ว', icon: 'success', confirmButtonColor: '#007AFF' });
-                document.getElementById('startDate').value = '';
-                document.getElementById('endDate').value = '';
-                document.getElementById('reason').value = '';
+                Swal.fire({ title: 'สำเร็จ!', icon: 'success', confirmButtonColor: '#007AFF' });
+                document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; document.getElementById('reason').value = '';
                 await loadAllData();
                 showTab('home');
-            } catch (e) {
-                Swal.fire('Error', 'บันทึกไม่สำเร็จ', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'บันทึกข้อมูล';
-            }
+            } catch (e) { Swal.fire('Error', 'บันทึกไม่สำเร็จ', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = 'บันทึกข้อมูล'; }
         }
 
         loadAllData();
