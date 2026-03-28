@@ -3,60 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Status - วมว. มน.</title>
+    <title>Executive Status - วมว. มน.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
-        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
-        .tab-active { border-bottom: 4px solid #0284c7; color: #0284c7; }
-        .status-card { transition: all 0.3s ease; }
-        .status-card:hover { transform: translateY(-2px); }
-        /* สไตล์ตารางสำหรับมือถือ */
+        body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
+        .executive-nav { background: #0f172a; }
+        .tab-active { border-bottom: 4px solid #f97316; color: #f97316; }
         .table-container { -webkit-overflow-scrolling: touch; }
-        .sticky-col { position: sticky; left: 0; background: white; z-index: 10; border-right: 2px solid #e2e8f0; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .sticky-col { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #e2e8f0; }
+        .today-highlight { background-color: #fefce8 !important; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
     </style>
 </head>
-<body class="pb-10">
+<body class="text-slate-800 pb-12">
 
-    <nav class="glass-nav sticky top-0 z-50 shadow-sm border-b border-slate-200">
+    <nav class="executive-nav sticky top-0 z-50 shadow-lg text-white">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-sky-600 rounded-lg flex items-center justify-center text-white font-bold">S</div>
-                    <span class="font-bold text-slate-800 text-lg hidden sm:block">วมว. มน. <span class="text-sky-600">Smart Status</span></span>
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-orange-500 rounded-lg shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04kM12 21.48l1.307-1.307a11.955 11.955 0 01-8.618-3.04" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">โครงการ วมว. มน.</h1>
+                        <p class="text-xs text-slate-400 uppercase tracking-widest">Executive Status Dashboard</p>
+                    </div>
                 </div>
-                <div class="flex gap-1 h-16">
-                    <button id="btn-home" onclick="showTab('home')" class="tab-btn px-4 h-full font-semibold text-slate-500 tab-active">แผน 5 วัน</button>
-                    <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-4 h-full font-semibold text-slate-500">ปฏิทิน</button>
-                    <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-4 h-full font-semibold text-slate-500">แอดมิน</button>
+                <div class="flex h-20">
+                    <button id="btn-home" onclick="showTab('home')" class="tab-btn px-4 h-full font-bold text-slate-300 hover:text-white transition-all tab-active">สถานะปัจจุบัน</button>
+                    <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-4 h-full font-bold text-slate-300 hover:text-white transition-all">ปฏิทิน</button>
+                    <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-4 h-full font-bold text-slate-300 hover:text-white transition-all">จัดการข้อมูล</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container max-w-7xl mx-auto px-4 mt-6">
+    <main class="max-w-7xl mx-auto px-4 mt-8">
         
-        <div id="tab-home" class="tab-content">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div id="tab-home" class="tab-content animate-in fade-in duration-500">
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">แผนปฏิบัติงานล่วงหน้า</h2>
-                        <p class="text-sm text-slate-500 mt-1">แสดงเฉพาะวันทำการ จันทร์ - ศุกร์</p>
+                        <h2 class="text-2xl font-bold text-slate-900">สถานะการปฏิบัติงานคณะผู้บริหาร</h2>
+                        <p class="text-slate-500 text-sm">อัปเดตแผนล่วงหน้า 5 วันทำการ (จันทร์ - ศุกร์)</p>
                     </div>
-                    <button onclick="loadAllData()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                    <button onclick="loadAllData()" class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm hover:bg-slate-100 transition-all font-semibold text-sm">
+                        <span>🔄 รีเฟรชข้อมูลล่าสุด</span>
                     </button>
                 </div>
+
                 <div class="table-container overflow-x-auto">
-                    <table class="w-full text-center border-collapse">
+                    <table class="w-full border-collapse">
                         <thead>
-                            <tr id="tableHeader" class="bg-slate-50"></tr>
+                            <tr id="tableHeader" class="bg-slate-100 text-slate-600 text-sm"></tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
@@ -64,54 +68,61 @@
             </div>
         </div>
 
-        <div id="tab-calendar" class="tab-content hidden">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <button onclick="changeMonth(-1)" class="p-2 border rounded-xl hover:bg-slate-50">◀ เดือนก่อน</button>
-                    <h2 id="calMonthYear" class="text-2xl font-bold text-sky-900"></h2>
-                    <button onclick="changeMonth(1)" class="p-2 border rounded-xl hover:bg-slate-50">เดือนหน้า ▶</button>
+        <div id="tab-calendar" class="tab-content hidden animate-in fade-in duration-500">
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+                    <h2 class="text-2xl font-bold text-slate-900">ปฏิทินปฏิบัติงานรวม</h2>
+                    <div class="flex items-center gap-4 bg-slate-100 p-1 rounded-2xl">
+                        <button onclick="changeMonth(-1)" class="px-4 py-2 hover:bg-white rounded-xl transition-all font-bold">◀</button>
+                        <span id="calMonthYear" class="w-40 text-center font-bold text-lg text-slate-700"></span>
+                        <button onclick="changeMonth(1)" class="px-4 py-2 hover:bg-white rounded-xl transition-all font-bold">▶</button>
+                    </div>
                 </div>
-                <div class="grid grid-cols-7 gap-2" id="calendarGrid"></div>
+                <div class="grid grid-cols-7 gap-3" id="calendarGrid"></div>
             </div>
         </div>
 
-        <div id="tab-admin" class="tab-content hidden">
-            <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
-                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <span class="w-2 h-8 bg-sky-600 rounded-full"></span> เพิ่มรายการไม่อยู่ปฏิบัติงาน
-                </h2>
-                <div class="space-y-4">
+        <div id="tab-admin" class="tab-content hidden animate-in zoom-in duration-300">
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl border border-slate-200 p-10">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900">บันทึกข้อมูลการลา / ไปราชการ</h2>
+                    <p class="text-slate-500 mt-2">สำหรับแอดมินเพื่ออัปเดตสถานะผู้บริหาร</p>
+                </div>
+                <div class="space-y-6">
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">ชื่อบุคลากร</label>
-                        <select id="adminNameSelect" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none"></select>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">เลือกรายชื่อผู้บริหาร</label>
+                        <select id="adminNameSelect" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all"></select>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label class="text-sm font-semibold text-slate-600">ตั้งแต่วันที่</label>
-                            <input type="date" id="startDate" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">เริ่มวันที่</label>
+                            <input type="date" id="startDate" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/20">
                         </div>
                         <div>
-                            <label class="text-sm font-semibold text-slate-600">ถึงวันที่</label>
-                            <input type="date" id="endDate" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">ถึงวันที่</label>
+                            <input type="date" id="endDate" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/20">
                         </div>
                     </div>
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">รายละเอียด (เช่น ไปราชการ กทม.)</label>
-                        <input type="text" id="reason" placeholder="ระบุเหตุผล" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">ระบุเหตุผล (เช่น ไปราชการ กทม.)</label>
+                        <input type="text" id="reason" placeholder="ตัวอย่าง: ไปราชการ, ลาพักผ่อน" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/20">
                     </div>
-                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95">บันทึกลงตาราง</button>
+                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-slate-900 hover:bg-orange-600 text-white font-bold py-5 rounded-2xl shadow-xl transform transition-all active:scale-95">
+                        ยืนยันการบันทึกข้อมูล
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <div id="loader" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
-        <div class="w-12 h-12 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 font-semibold text-sky-900">กำลังซิงค์ข้อมูลล่าสุด...</p>
+    <div id="loader" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-6 font-bold text-white text-lg tracking-widest animate-pulse">กำลังซิงค์ข้อมูลผู้บริหาร...</p>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzxT63E3SeiMZoWeK_KbVD1Ci8DHp6L_VzRFsE9tcF3cvB1d2VsoVr2hPj9tq3Azt4dgg/exec';
+        // ใช้ URL ใหม่ที่คุณให้มา
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzxT63E3SeiMZoWeK_KbVD1Ci8DHp6L_VzRFsE9tcF3cvB1d2VsoVr2hPj9tq3Azt4dgg/exec';
 
         let rawStatus = [];
         let rawSchedule = [];
@@ -121,8 +132,8 @@
             document.getElementById('loader').classList.remove('hidden');
             try {
                 const [res1, res2] = await Promise.all([
-                    fetch(`${API_URL}?sheet=Status`, { redirect: 'follow' }),
-                    fetch(`${API_URL}?sheet=Schedule`, { redirect: 'follow' })
+                    fetch(`${GAS_URL}?sheet=Status`, { redirect: 'follow' }),
+                    fetch(`${GAS_URL}?sheet=Schedule`, { redirect: 'follow' })
                 ]);
                 rawStatus = await res1.json();
                 rawSchedule = await res2.json();
@@ -130,7 +141,7 @@
                 renderCalendar();
                 populateAdminSelect();
             } catch (e) {
-                Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+                Swal.fire('การเชื่อมต่อล้มเหลว', 'โปรดตรวจสอบสิทธิ์การเข้าถึงข้อมูล', 'error');
             } finally {
                 document.getElementById('loader').classList.add('hidden');
             }
@@ -141,8 +152,6 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
             document.getElementById(`tab-${id}`).classList.remove('hidden');
             document.getElementById(`btn-${id}`).classList.add('tab-active');
-            if(id === 'home') renderHome();
-            if(id === 'calendar') renderCalendar();
         }
 
         function normalizeDate(d) {
@@ -158,45 +167,41 @@
             const dates = [];
             let temp = new Date();
             
-            // คัดเลือก 5 วันทำการ (จ-ศ)
             while(dates.length < 5) {
                 if(temp.getDay() !== 0 && temp.getDay() !== 6) dates.push(new Date(temp));
                 temp.setDate(temp.getDate() + 1);
             }
 
-            header.innerHTML = '<th class="p-4 sticky-col text-slate-600">รายชื่อเจ้าหน้าที่</th>';
+            header.innerHTML = '<th class="p-6 sticky-col text-left font-bold text-slate-900 text-base">คณะผู้บริหาร</th>';
             dates.forEach((d, idx) => {
-                const isToday = idx === 0;
                 header.innerHTML += `
-                    <th class="p-4 min-w-[120px] ${isToday ? 'bg-sky-50 text-sky-700' : 'text-slate-600'}">
-                        <div class="text-xs font-bold uppercase">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
-                        <div class="text-lg font-bold">${d.getDate()} ${d.toLocaleDateString('th-TH', {month:'short'})}</div>
+                    <th class="p-6 min-w-[140px] ${idx === 0 ? 'today-highlight' : ''}">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-tighter">${d.toLocaleDateString('th-TH', {weekday:'long'})}</div>
+                        <div class="text-lg font-extrabold text-slate-800">${d.getDate()} ${d.toLocaleDateString('th-TH', {month:'short'})}</div>
                     </th>`;
             });
 
             body.innerHTML = '';
             rawStatus.forEach(person => {
-                let row = `<tr><td class="p-4 name-col sticky-col text-left">
-                    <div class="font-bold text-slate-800">${person.Name}</div>
-                    <div class="text-[10px] text-slate-400 uppercase tracking-wider">${person.Role}</div>
+                let row = `<tr class="hover:bg-slate-50 transition-colors"><td class="p-6 name-col sticky-col border-b border-slate-100">
+                    <div class="font-bold text-slate-900 text-lg">${person.Name}</div>
+                    <div class="text-xs font-bold text-orange-600 uppercase mt-1 tracking-widest">${person.Role}</div>
                 </td>`;
                 
                 dates.forEach((date, idx) => {
                     const target = normalizeDate(date);
-                    const isToday = idx === 0;
-                    
                     const schedule = rawSchedule.find(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.trim() === person.Name.trim());
                     const isDirAbsent = rawSchedule.some(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
 
-                    let content = '<div class="text-2xl text-emerald-500">✅</div>';
+                    let content = '<div class="text-2xl text-emerald-500 drop-shadow-sm">✅</div>';
 
                     if(schedule) {
-                        content = `<div class="text-xl">❌</div><div class="text-[10px] font-bold text-rose-600 leading-tight mt-1">${schedule.Reason}</div>`;
+                        content = `<div class="text-2xl mb-1">❌</div><div class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100">${schedule.Reason}</div>`;
                     } else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) {
-                        content = `<div class="text-xl">👑</div><div class="text-[9px] font-bold text-indigo-600 leading-tight mt-1 uppercase">รักษาราชการแทน ผอ.</div>`;
+                        content = `<div class="text-2xl mb-1">👑</div><div class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 leading-tight">รักษาราชการแทน ผอ.</div>`;
                     }
                     
-                    row += `<td class="p-4 ${isToday ? 'bg-sky-50/50' : ''}">${content}</td>`;
+                    row += `<td class="p-6 border-b border-slate-100 ${idx === 0 ? 'today-highlight' : ''}">${content}</td>`;
                 });
                 body.innerHTML += row + '</tr>';
             });
@@ -210,7 +215,7 @@
             const m = viewDate.getMonth();
             monthYear.innerText = new Intl.DateTimeFormat('th-TH', {month:'long', year:'numeric'}).format(viewDate);
             
-            ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-bold text-slate-400 py-2 text-xs uppercase">${d}</div>`);
+            ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-bold text-slate-400 py-3 text-xs uppercase tracking-widest">${d}</div>`);
             
             const first = new Date(y, m, 1).getDay();
             const days = new Date(y, m + 1, 0).getDate();
@@ -223,17 +228,17 @@
                 
                 let peopleList = rawStatus.map(p => {
                     const absent = rawSchedule.some(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
-                    const lastName = p.Name.split(' ')[1] || p.Name;
-                    return `<div class="flex justify-between items-center text-[9px] mb-0.5 border-b border-slate-50 pb-0.5">
-                        <span class="${absent ? 'text-slate-400' : 'text-slate-700 font-semibold'}">${lastName}</span>
+                    const shortName = p.Name.split(' ')[1] || p.Name;
+                    return `<div class="flex justify-between items-center text-[10px] py-1 border-b border-slate-50">
+                        <span class="${absent ? 'text-slate-300 line-through' : 'text-slate-600 font-bold'}">${shortName}</span>
                         <span>${absent ? '❌' : '✅'}</span>
                     </div>`;
                 }).join('');
 
                 grid.innerHTML += `
-                    <div class="cal-day border border-slate-100 rounded-xl p-2 flex flex-col ${isToday ? 'ring-2 ring-sky-500 bg-sky-50' : ''}">
-                        <div class="text-sm font-bold mb-1 ${isToday ? 'text-sky-600' : 'text-slate-400'}">${d}</div>
-                        <div class="flex-1 overflow-y-auto">${peopleList}</div>
+                    <div class="min-h-[110px] bg-white border border-slate-100 rounded-2xl p-2 flex flex-col shadow-sm ${isToday ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:shadow-md transition-shadow'}">
+                        <div class="text-sm font-black mb-2 ${isToday ? 'text-orange-600' : 'text-slate-300'}">${d}</div>
+                        <div class="flex-1 overflow-y-auto custom-scroll">${peopleList}</div>
                     </div>`;
             }
         }
@@ -241,10 +246,8 @@
         function changeMonth(s) { viewDate.setMonth(viewDate.getMonth() + s); renderCalendar(); }
         
         function populateAdminSelect() {
-            document.getElementById('adminNameSelect').innerHTML = rawStatus.map(p => `<option value="${personFullName(p.Name)}">${p.Name}</option>`).join('');
+            document.getElementById('adminNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join('');
         }
-        
-        function personFullName(name) { return name.trim(); }
 
         async function submitAbsence() {
             const btn = document.getElementById('submitBtn');
@@ -256,24 +259,24 @@
                 reason: document.getElementById('reason').value
             };
 
-            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุวันที่และรายละเอียด', 'warning');
+            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณาระบุวันที่และรายละเอียดเหตุผล', 'warning');
 
             btn.disabled = true;
-            btn.innerHTML = 'กำลังบันทึก...';
+            btn.innerHTML = 'กำลังดำเนินการส่งข้อมูล...';
 
             try {
-                await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
-                Swal.fire({ title: 'สำเร็จ!', text: 'บันทึกข้อมูลตารางปฏิบัติงานแล้ว', icon: 'success', confirmButtonColor: '#0284c7' });
+                await fetch(GAS_URL, { method:'POST', body: JSON.stringify(data) });
+                Swal.fire({ title: 'สำเร็จ!', text: 'อัปเดตสถานะผู้บริหารเรียบร้อยแล้ว', icon: 'success', confirmButtonColor: '#0f172a' });
                 document.getElementById('startDate').value = '';
                 document.getElementById('endDate').value = '';
                 document.getElementById('reason').value = '';
                 await loadAllData();
                 showTab('home');
             } catch (e) {
-                Swal.fire('Error', 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง', 'error');
+                Swal.fire('Error', 'บันทึกไม่สำเร็จ โปรดลองอีกครั้ง', 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = 'บันทึกลงตาราง';
+                btn.innerHTML = 'ยืนยันการบันทึกข้อมูล';
             }
         }
 
