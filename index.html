@@ -32,17 +32,19 @@
         .info { flex-grow: 1; }
         .name { font-size: 1.2em; font-weight: bold; }
         .role { color: #666; font-size: 0.9em; }
-        .time { font-size: 0.8em; color: #999; margin-top: 5px; }
-        .status-badge { padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; display: inline-block; min-width: 60px; text-align: center; }
-        .status-in { background-color: #d4edda; color: #155724; }
-        .status-out { background-color: #f8d7da; color: #721c24; }
-        .status-meeting { background-color: #fff3cd; color: #856404; }
-        .status-leave { background-color: #e2e3e5; color: #383d41; }
         
-        .action-area { display: flex; align-items: center; gap: 10px; margin-left: 20px; }
+        .status-badge { padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; display: inline-block; min-width: 60px; text-align: center; }
+        .status-in { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-out { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-meeting { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .status-leave { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+        .status-acting { background-color: #f3e5f5; color: #4a148c; border: 1px solid #7b1fa2; }
+        
+        .action-area { display: flex; align-items: center; gap: 10px; margin-left: 20px; justify-content: flex-end; min-width: 200px; }
         .action-area select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-family: 'Sarabun', sans-serif; }
         .btn-update { padding: 8px 15px; background-color: var(--secondary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Sarabun', sans-serif; transition: background 0.2s; }
         .btn-update:hover { background-color: #004494; }
+        .auto-text { color: #999; font-size: 0.85em; font-style: italic; }
 
         /* --- Styles สำหรับหน้าปฏิทิน --- */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -78,11 +80,10 @@
     </div>
 
     <div class="container">
-        
         <div id="statusTab" class="tab-content active">
             <h2 style="margin-top: 0; color: var(--secondary-color);">สถานะผู้บริหารและเจ้าหน้าที่</h2>
             <div id="statusBoard">
-                <div class="loading">กำลังโหลดข้อมูลสถานะ...</div>
+                <div class="loading">กำลังโหลดข้อมูล...</div>
             </div>
         </div>
 
@@ -99,16 +100,14 @@
                 <div style="grid-column: 1 / -1;" class="loading">กำลังโหลดข้อมูลปฏิทิน...</div>
             </div>
         </div>
-
     </div>
 
     <script>
         // =========================================================================
-        // ตั้งค่า API (นำ URL จาก Google Apps Script มาใส่ที่นี่)
+        // URL API ของคุณที่ให้มา
         // =========================================================================
-        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbyEK-HYCDA5JEB8bZfc5C3eaa1PKVhYFIRiYrlGqqMMSofD-iQlOw7JmlcFz-IgbBM6KQ/exec';
+        const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbzmDkumYOBEQzUdv2yJQz6efghEkpU6k07QyYiVGQagEBL5WDOeLsRhzr_RVmNJx8JGVQ/exec';
         
-        // แยก URL สำหรับดึงข้อมูลแต่ละหน้า
         const API_STATUS = `${GAS_BASE_URL}?sheet=Status`;
         const API_CALENDAR = `${GAS_BASE_URL}?sheet=Schedule`;
 
@@ -116,56 +115,119 @@
         // ระบบ Tab Navigation
         // =========================================================================
         function switchTab(tabId) {
-            // ซ่อนทุกแท็บและเอา active ออกจากปุ่ม
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
             
-            // แสดงแท็บที่เลือก
             document.getElementById(tabId).classList.add('active');
             document.getElementById(`btn-${tabId}`).classList.add('active');
 
-            // โหลดข้อมูลเมื่อเปิดแท็บนั้นๆ
             if(tabId === 'statusTab') loadStatusData();
             if(tabId === 'calendarTab' && calendarData.length === 0) loadCalendarData();
         }
 
         // =========================================================================
-        // ฟังก์ชันของ Tab 1: กระดานสถานะวันนี้
+        // ฟังก์ชัน TAB 1: กระดานสถานะวันนี้
         // =========================================================================
         async function loadStatusData() {
             const board = document.getElementById('statusBoard');
             try {
-                const response = await fetch(API_STATUS);
-                const data = await response.json();
+                const [statusRes, calendarRes] = await Promise.all([
+                    fetch(API_STATUS),
+                    fetch(API_CALENDAR)
+                ]);
                 
-                if(data.error) throw new Error(data.error);
+                const statusData = await statusRes.json();
+                const calendarData = await calendarRes.json();
                 
+                if(statusData.error) throw new Error(statusData.error);
+                
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const todayString = `${year}-${month}-${day}`;
+                
+                // เช็ควันหยุดสุดสัปดาห์ (0=อาทิตย์, 6=เสาร์)
+                const isWeekend = (today.getDay() === 0 || today.getDay() === 6);
+                
+                const todaysEvents = calendarData.filter(e => e.date === todayString);
+                
+                // เช็คสถานะ ผอ. ฑิราณี (จากปฏิทิน หรือ กดเปลี่ยนมือ)
+                const dirCalendarAbsent = todaysEvents.some(e => e.name && e.name.includes('ฑิราณี') && e.type === 'absent');
+                const dirManualStatus = statusData.find(p => p.Name && p.Name.includes('ฑิราณี'))?.Status;
+                const isDirectorAbsent = dirCalendarAbsent || (dirManualStatus === 'ไม่อยู่' || dirManualStatus === 'ลา');
+
                 board.innerHTML = '';
-                data.forEach(person => {
-                    // กำหนดสีตามสถานะ
-                    let statusClass = 'status-leave'; // ค่าเริ่มต้น
-                    if(person.Status === 'อยู่') statusClass = 'status-in';
-                    else if(person.Status === 'ไม่อยู่') statusClass = 'status-out';
-                    else if(person.Status === 'ประชุม') statusClass = 'status-meeting';
+                
+                statusData.forEach(person => {
+                    if(!person.Name) return; 
+
+                    let currentStatus = person.Status || 'อยู่'; 
+                    let displayStatus = currentStatus;
+                    let statusClass = 'status-in';
+                    let isAuto = false;
+
+                    if (isWeekend) {
+                        displayStatus = 'วันหยุดเสาร์-อาทิตย์';
+                        statusClass = 'status-leave';
+                        isAuto = true;
+                    } else {
+                        const myEvent = todaysEvents.find(e => e.name && (e.name.includes(person.Name) || person.Name.includes(e.name)));
+                        
+                        if (myEvent) {
+                            displayStatus = myEvent.status; 
+                            if(myEvent.type === 'absent') statusClass = 'status-out';
+                            if(myEvent.type === 'meeting') statusClass = 'status-meeting';
+                            if(myEvent.type === 'acting') statusClass = 'status-acting';
+                            isAuto = true;
+                        } else {
+                            if(currentStatus === 'อยู่') statusClass = 'status-in';
+                            else if(currentStatus === 'ไม่อยู่') statusClass = 'status-out';
+                            else if(currentStatus === 'ประชุม') statusClass = 'status-meeting';
+                            else if(currentStatus === 'ลา') statusClass = 'status-leave';
+                        }
+
+                        // กฎที่ 1: ผอ. ฑิราณี (ผู้มีอำนาจลงนาม)
+                        if (person.Name.includes('ฑิราณี')) {
+                            if (!isDirectorAbsent && currentStatus === 'อยู่') {
+                                displayStatus = 'อยู่ (ผู้มีอำนาจลงนาม)';
+                                statusClass = 'status-in';
+                            }
+                        }
+
+                        // กฎที่ 2: รักษาราชการแทน ทนงศักดิ์
+                        if (person.Name.includes('ทนงศักดิ์') && isDirectorAbsent) {
+                            if (!myEvent || myEvent.type !== 'absent') {
+                                if (currentStatus !== 'ไม่อยู่' && currentStatus !== 'ลา') {
+                                    displayStatus = 'รักษาราชการแทน ผอ.';
+                                    statusClass = 'status-acting';
+                                    isAuto = true;
+                                }
+                            }
+                        }
+                    }
+
+                    const actionHTML = isAuto ? 
+                        `<span class="auto-text">(ระบบอัตโนมัติ)</span>` :
+                        `<select id="select-${person.ID}">
+                            <option value="อยู่" ${currentStatus === 'อยู่' ? 'selected' : ''}>อยู่</option>
+                            <option value="ไม่อยู่" ${currentStatus === 'ไม่อยู่' ? 'selected' : ''}>ไม่อยู่</option>
+                            <option value="ประชุม" ${currentStatus === 'ประชุม' ? 'selected' : ''}>ประชุม</option>
+                            <option value="ลา" ${currentStatus === 'ลา' ? 'selected' : ''}>ลา</option>
+                        </select>
+                        <button class="btn-update" onclick="updateStatus('${person.ID}')">บันทึก</button>`;
 
                     board.innerHTML += `
                         <div class="person-card">
                             <div class="info">
                                 <div class="name">${person.Name}</div>
-                                <div class="role">${person.Role}</div>
-                                <div class="time">อัปเดตล่าสุด: ${person.LastUpdated || '-'}</div>
+                                <div class="role">${person.Role || ''}</div>
                             </div>
                             <div>
-                                <span class="status-badge ${statusClass}" id="badge-${person.ID}">${person.Status || 'ยังไม่ระบุ'}</span>
+                                <span class="status-badge ${statusClass}" id="badge-${person.ID}">${displayStatus}</span>
                             </div>
                             <div class="action-area">
-                                <select id="select-${person.ID}">
-                                    <option value="อยู่" ${person.Status === 'อยู่' ? 'selected' : ''}>อยู่</option>
-                                    <option value="ไม่อยู่" ${person.Status === 'ไม่อยู่' ? 'selected' : ''}>ไม่อยู่</option>
-                                    <option value="ประชุม" ${person.Status === 'ประชุม' ? 'selected' : ''}>ประชุม</option>
-                                    <option value="ลา" ${person.Status === 'ลา' ? 'selected' : ''}>ลา</option>
-                                </select>
-                                <button class="btn-update" onclick="updateStatus('${person.ID}')">บันทึก</button>
+                                ${actionHTML}
                             </div>
                         </div>
                     `;
@@ -180,8 +242,8 @@
             const badge = document.getElementById(`badge-${id}`);
             const originalText = badge.innerText;
             
-            badge.innerText = 'กำลังบันทึก...';
-            badge.className = 'status-badge'; // รีเซ็ตสีชั่วคราว
+            badge.innerText = 'บันทึก...';
+            badge.className = 'status-badge'; 
 
             try {
                 const response = await fetch(GAS_BASE_URL, {
@@ -192,7 +254,7 @@
                 const result = await response.json();
                 
                 if(result.status === 'success') {
-                    loadStatusData(); // โหลดใหม่เพื่อดึงเวลาอัปเดตล่าสุด
+                    loadStatusData(); 
                 } else {
                     alert('เกิดข้อผิดพลาด: ' + result.message);
                     badge.innerText = originalText;
@@ -204,9 +266,9 @@
         }
 
         // =========================================================================
-        // ฟังก์ชันของ Tab 2: ปฏิทินปฏิบัติงาน
+        // ฟังก์ชัน TAB 2: ปฏิทินปฏิบัติงาน
         // =========================================================================
-        let currentDate = new Date(); // ดึงวันที่ปัจจุบัน
+        let currentDate = new Date(); 
         let calendarData = [];
         const monthNamesTH = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
         const dayNamesTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสฯ", "ศุกร์", "เสาร์"];
@@ -244,7 +306,6 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
-                // ดึงข้อมูลและเรียงลำดับ (absent ขึ้นก่อน)
                 const dayEvents = calendarData.filter(e => e.date === dateString)
                                               .sort((a, b) => (a.type === 'absent' ? -1 : 1));
                 
@@ -278,9 +339,9 @@
         }
 
         // =========================================================================
-        // เริ่มต้นการทำงานเมื่อเปิดเว็บ
+        // เริ่มต้นการทำงาน
         // =========================================================================
-        loadStatusData(); // โหลดหน้าแรกอัตโนมัติ
+        loadStatusData(); 
 
     </script>
 </body>
