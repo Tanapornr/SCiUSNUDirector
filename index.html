@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Executive Hub - SCiUS NU</title>
+    <title>ตารางการปฏิบัติงาน ผู้บริหาร โครงการวมว.มน. - SCiUS NU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -17,9 +17,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Sarabun", sans-serif; 
             background-color: var(--ios-bg); 
             color: #000;
+            overflow-x: hidden;
         }
+        /* iOS Glassmorphism Navigation */
         .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
         }
@@ -30,118 +32,114 @@
         .tab-active {
             background-color: white;
             color: var(--ios-blue) !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .ios-card {
             background: var(--ios-card);
             border-radius: 24px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         }
-        .sticky-col {
-            position: sticky;
-            left: 0;
-            background: #fff;
-            z-index: 20;
-            border-right: 1px solid #F2F2F7;
+        /* No-Scroll Table Styles */
+        .table-fixed-layout {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .cell-condensed {
+            padding: 8px 2px !important;
+            word-wrap: break-word;
         }
         .today-highlight {
-            background-color: rgba(0, 122, 255, 0.03) !important;
+            background-color: rgba(0, 122, 255, 0.05) !important;
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* สัญลักษณ์ iOS Clickable */
-        .symbol-btn {
+        /* Click Interaction */
+        .clickable-symbol {
             cursor: pointer;
             transition: transform 0.1s;
+            display: inline-block;
         }
-        .symbol-btn:active {
-            transform: scale(0.85);
+        .clickable-symbol:active {
+            transform: scale(0.8);
+        }
+        /* Custom SwAl Animation */
+        .swal2-popup {
+            border-radius: 28px !important;
+            font-family: 'Sarabun', sans-serif !important;
         }
     </style>
 </head>
 <body class="pb-10">
 
     <header class="glass-nav sticky top-0 z-50 border-b border-gray-200/50">
-        <div class="max-w-6xl mx-auto px-5 flex justify-between items-center h-20">
+        <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-20">
             <div class="flex flex-col">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Executive Center</span>
-                <h1 class="text-xl font-extrabold text-black">คณะผู้บริหาร</h1>
+                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] leading-none">Executive</span>
+                <h1 class="text-xl font-extrabold text-black tracking-tight">คณะผู้บริหาร</h1>
             </div>
-            <div class="flex bg-gray-200/50 p-1 rounded-2xl w-fit">
-                <button id="btn-home" onclick="showTab('home')" class="tab-btn px-4 py-2 text-sm font-bold text-gray-500 tab-active">สถานะ</button>
-                <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-4 py-2 text-sm font-bold text-gray-500">ปฏิทิน</button>
-                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-4 py-2 text-sm font-bold text-gray-500">จัดการ</button>
+            <div class="flex bg-gray-200/50 p-1 rounded-2xl">
+                <button id="btn-home" onclick="showTab('home')" class="tab-btn px-4 py-2 text-xs font-bold text-gray-500 tab-active">สถานะ</button>
+                <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-4 py-2 text-xs font-bold text-gray-500">ปฏิทิน</button>
+                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-4 py-2 text-xs font-bold text-gray-500">จัดการ</button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-5 mt-8">
+    <main class="max-w-4xl mx-auto px-3 mt-6">
         
         <div id="tab-home" class="tab-content transition-opacity duration-300">
-            <div class="flex items-end justify-between mb-6 px-2">
-                <div>
-                    <h2 class="text-2xl font-extrabold tracking-tight text-black">แผนปฏิบัติงาน</h2>
-                    <p class="text-xs font-bold text-blue-500 uppercase">5 วันทำการล่วงหน้า</p>
-                </div>
-                <button onclick="loadAllData()" class="text-blue-500 font-bold text-sm bg-blue-50 px-4 py-2 rounded-full">อัปเดต</button>
+            <div class="flex items-end justify-between mb-4 px-2">
+                <h2 class="text-xl font-extrabold tracking-tight text-black">แผนปฏิบัติงาน 5 วัน</h2>
+                <button onclick="loadAllData()" class="text-blue-500 font-bold text-xs bg-white px-3 py-1.5 rounded-full shadow-sm">รีเฟรช</button>
             </div>
             
             <div class="ios-card overflow-hidden">
-                <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full border-collapse">
-                        <thead>
-                            <tr id="tableHeader" class="bg-gray-50/30 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100"></tr>
-                        </thead>
-                        <tbody id="tableBody" class="divide-y divide-gray-50"></tbody>
-                    </table>
-                </div>
+                <table class="table-fixed-layout text-center">
+                    <thead>
+                        <tr id="tableHeader" class="bg-gray-50/50 text-[9px] font-black text-gray-400 uppercase tracking-tighter border-b border-gray-100"></tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-50"></tbody>
+                </table>
             </div>
-            <div class="mt-6 p-4 ios-card bg-blue-50/50 border border-blue-100">
-                <p class="text-[11px] text-blue-600 leading-relaxed font-semibold">
-                    💡 **คำแนะนำ:** คลิกที่สัญลักษณ์ <span class="text-red-500">❌</span> เพื่อตรวจสอบรายละเอียดการไปราชการหรือการลาของคณะผู้บริหาร
-                </p>
-            </div>
+            <p class="mt-4 text-[10px] text-gray-400 text-center font-medium">แตะที่เครื่องหมาย <span class="text-red-500">❌</span> เพื่อดูรายละเอียด</p>
         </div>
 
         <div id="tab-calendar" class="tab-content hidden">
-            <div class="ios-card p-6">
-                <div class="flex justify-between items-center mb-8 px-2">
-                    <button onclick="changeMonth(-1)" class="text-blue-500 font-black text-xl bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center">‹</button>
-                    <h2 id="calMonthYear" class="text-xl font-extrabold text-black"></h2>
-                    <button onclick="changeMonth(1)" class="text-blue-500 font-black text-xl bg-gray-100 w-10 h-10 rounded-full flex items-center justify-center">›</button>
+            <div class="ios-card p-4">
+                <div class="flex justify-between items-center mb-6 px-1">
+                    <button onclick="changeMonth(-1)" class="text-blue-500 font-black text-lg bg-gray-100 w-9 h-9 rounded-full flex items-center justify-center">‹</button>
+                    <h2 id="calMonthYear" class="text-base font-extrabold text-black"></h2>
+                    <button onclick="changeMonth(1)" class="text-blue-500 font-black text-lg bg-gray-100 w-9 h-9 rounded-full flex items-center justify-center">›</button>
                 </div>
-                <div class="grid grid-cols-7 gap-3" id="calendarGrid"></div>
+                <div class="grid grid-cols-7 gap-1.5" id="calendarGrid"></div>
             </div>
         </div>
 
         <div id="tab-admin" class="tab-content hidden">
-            <div class="max-w-md mx-auto ios-card p-8">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-extrabold text-black">ลงข้อมูลล่วงหน้า</h2>
-                    <p class="text-sm font-bold text-gray-400 uppercase">Executive Schedule Management</p>
+            <div class="max-w-sm mx-auto ios-card p-6">
+                <div class="mb-6">
+                    <h2 class="text-xl font-extrabold text-black tracking-tight">ลงข้อมูลล่วงหน้า</h2>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Management Schedule</p>
                 </div>
-                <div class="space-y-6">
+                <div class="space-y-4">
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase ml-1">ผู้บริหาร</label>
-                        <select id="adminNameSelect" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold"></select>
+                        <select id="adminNameSelect" class="w-full mt-1 p-3 bg-gray-100/50 rounded-xl border-none font-bold text-sm"></select>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-[10px] font-black text-gray-400 uppercase ml-1">จากวันที่</label>
-                            <input type="date" id="startDate" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold">
+                            <input type="date" id="startDate" class="w-full mt-1 p-3 bg-gray-100/50 rounded-xl border-none text-xs font-bold">
                         </div>
                         <div>
                             <label class="text-[10px] font-black text-gray-400 uppercase ml-1">ถึงวันที่</label>
-                            <input type="date" id="endDate" class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold">
+                            <input type="date" id="endDate" class="w-full mt-1 p-3 bg-gray-100/50 rounded-xl border-none text-xs font-bold">
                         </div>
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1">รายละเอียด (ไปที่ไหน/ลาประเภทใด)</label>
-                        <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full mt-1 p-4 bg-gray-50 rounded-2xl border-none font-semibold">
+                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1">รายละเอียด (ไปไหน/ลาอะไร)</label>
+                        <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full mt-1 p-3 bg-gray-100/50 rounded-xl border-none text-sm font-bold">
                     </div>
-                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-[#007AFF] hover:bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95">
-                        ยืนยันการบันทึกข้อมูล
+                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-[#007AFF] hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm mt-2">
+                        บันทึกข้อมูล
                     </button>
                 </div>
             </div>
@@ -149,10 +147,7 @@
     </main>
 
     <div id="loader" class="fixed inset-0 bg-white/70 backdrop-blur-xl z-[100] flex items-center justify-center hidden">
-        <div class="flex flex-col items-center">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="mt-4 text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Syncing Hub</span>
-        </div>
+        <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
 
     <script>
@@ -160,7 +155,7 @@
 
         let rawStatus = [];
         let rawSchedule = [];
-        let viewDate = new Date(2026, 2, 30); // เริ่มต้นที่ มีนาคม 2569
+        let viewDate = new Date(2026, 2, 30); // ตั้งค่าเริ่มต้นที่ 30 มีนาคม 2569
 
         async function loadAllData() {
             document.getElementById('loader').classList.remove('hidden');
@@ -175,7 +170,7 @@
                 renderCalendar();
                 populateAdminSelect();
             } catch (e) {
-                Swal.fire('Error', 'ไม่สามารถเข้าถึงข้อมูลคณะผู้บริหารได้', 'error');
+                Swal.fire('Error', 'ไม่สามารถดึงข้อมูลได้', 'error');
             } finally {
                 document.getElementById('loader').classList.add('hidden');
             }
@@ -195,32 +190,23 @@
             return date.getTime();
         }
 
-        // ฟังก์ชันแสดงป๊อปอัพข้อมูลการลา
-        function showAbsenceDetail(name, reason, start, end) {
-            const sDate = new Date(start).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
-            const eDate = new Date(end).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+        // ฟังก์ชัน Modal สไตล์ iOS
+        function showDetail(name, reason, start, end) {
+            const startDate = new Date(start).toLocaleDateString('th-TH', { day:'numeric', month:'short' });
+            const endDate = new Date(end).toLocaleDateString('th-TH', { day:'numeric', month:'short' });
             
             Swal.fire({
-                title: `<span class="text-lg font-bold">ข้อมูลการปฏิบัติหน้าที่</span>`,
+                title: `<p class="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">รายละเอียดการลา</p><p class="text-lg font-extrabold text-black">${name}</p>`,
                 html: `
-                    <div class="text-left space-y-3 mt-4">
-                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <p class="text-[10px] font-black text-gray-400 uppercase">ผู้บริหาร</p>
-                            <p class="text-sm font-bold text-gray-800">${name}</p>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <p class="text-[10px] font-black text-gray-400 uppercase">รายละเอียด</p>
-                            <p class="text-sm font-bold text-red-500">${reason}</p>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <p class="text-[10px] font-black text-gray-400 uppercase">ช่วงเวลา</p>
-                            <p class="text-xs font-bold text-gray-600">${sDate} - ${eDate}</p>
-                        </div>
+                    <div class="text-center py-2">
+                        <p class="text-base font-bold text-red-500 mb-2">"${reason}"</p>
+                        <p class="text-xs font-bold text-gray-400">ช่วงวันที่: ${startDate} - ${endDate}</p>
                     </div>
                 `,
-                confirmButtonText: 'ตกลง',
+                confirmButtonText: 'รับทราบ',
                 confirmButtonColor: '#007AFF',
-                customClass: { popup: 'rounded-[24px]' }
+                buttonsStyling: true,
+                showClass: { popup: 'animate__animated animate__fadeInUp animate__faster' }
             });
         }
 
@@ -229,30 +215,30 @@
             const body = document.getElementById('tableBody');
             const dates = [];
             
-            // ปรับให้เริ่ม 30 มีนาคม 2569 (หรือวันที่ปัจจุบันถ้าผ่านไปแล้ว)
-            let startPoint = new Date(2026, 2, 30);
+            let startLimit = new Date(2026, 2, 30);
             let today = new Date();
-            let temp = (today > startPoint) ? today : startPoint;
+            let temp = (today > startLimit) ? today : new Date(startLimit);
 
             while(dates.length < 5) {
                 if(temp.getDay() !== 0 && temp.getDay() !== 6) dates.push(new Date(temp));
                 temp.setDate(temp.getDate() + 1);
             }
 
-            header.innerHTML = '<th class="p-6 sticky-col text-left font-black text-gray-400">Executive</th>';
+            // ชื่อคณะผู้บริหารคอลัมน์แรก 25%, วันที่ 5 คอลัมน์ละ 15%
+            header.innerHTML = '<th class="w-[25%] p-3 text-left font-black text-gray-300">รายชื่อ</th>';
             dates.forEach((d, idx) => {
                 header.innerHTML += `
-                    <th class="p-6 min-w-[130px] ${idx === 0 ? 'today-highlight' : ''}">
-                        <div class="opacity-40">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
-                        <div class="text-sm font-bold text-gray-800">${d.getDate()} ${d.toLocaleDateString('th-TH', {month:'short'})}</div>
+                    <th class="w-[15%] cell-condensed ${idx === 0 ? 'today-highlight' : ''}">
+                        <div class="opacity-50">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
+                        <div class="text-xs font-black text-gray-800">${d.getDate()}</div>
                     </th>`;
             });
 
             body.innerHTML = '';
             rawStatus.forEach(person => {
-                let row = `<tr class="bg-white"><td class="p-6 sticky-col border-b border-gray-50">
-                    <div class="font-bold text-gray-900">${person.Name}</div>
-                    <div class="text-[9px] font-black text-blue-500 uppercase">${person.Role}</div>
+                let row = `<tr class="bg-white"><td class="p-3 text-left border-b border-gray-50">
+                    <div class="text-[11px] font-bold text-black leading-tight">${person.Name.split(' ')[0]}</div>
+                    <div class="text-[8px] font-black text-blue-500 uppercase">${person.Role.split(' ')[0]}</div>
                 </td>`;
                 
                 dates.forEach((date, idx) => {
@@ -260,15 +246,18 @@
                     const schedule = rawSchedule.find(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.trim() === person.Name.trim());
                     const isDirAbsent = rawSchedule.some(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
 
-                    let content = '<div class="text-2xl opacity-20">✅</div>';
+                    let content = '<div class="text-lg opacity-10">✅</div>';
 
                     if(schedule) {
-                        content = `<div onclick="showAbsenceDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="symbol-btn text-2xl">❌</div>`;
+                        content = `<div onclick="showDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="clickable-symbol text-lg">❌</div>`;
                     } else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) {
-                        content = `<div class="text-2xl">👑</div><div class="text-[8px] font-black text-indigo-600 mt-1 uppercase">Acting</div>`;
+                        content = `<div class="flex flex-col items-center">
+                            <span class="text-lg">👑</span>
+                            <span class="text-[6px] font-black text-blue-600 leading-none">รักษาราชการแทน ผอ.</span>
+                        </div>`;
                     }
                     
-                    row += `<td class="p-6 text-center border-b border-gray-50 ${idx === 0 ? 'today-highlight' : ''}">${content}</td>`;
+                    row += `<td class="cell-condensed border-b border-gray-50 ${idx === 0 ? 'today-highlight' : ''}">${content}</td>`;
                 });
                 body.innerHTML += row + '</tr>';
             });
@@ -282,7 +271,9 @@
             const m = viewDate.getMonth();
             monthYear.innerText = new Intl.DateTimeFormat('th-TH', {month:'long', year:'numeric'}).format(viewDate);
             
-            ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-black text-gray-300 text-[9px] py-3 uppercase tracking-widest">${d}</div>`);
+            const startLimit = new Date(2026, 2, 30);
+
+            ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-black text-gray-300 text-[8px] py-1 uppercase">${d}</div>`);
             
             const first = new Date(y, m, 1).getDay();
             const days = new Date(y, m + 1, 0).getDate();
@@ -290,21 +281,28 @@
             for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
             
             for(let d=1; d<=days; d++) {
-                const current = normalizeDate(`${y}-${m+1}-${d}`);
+                const currentObj = new Date(y, m, d);
+                const current = normalizeDate(currentObj);
                 const isToday = current === normalizeDate(new Date());
                 
-                let peopleList = rawStatus.map(p => {
-                    const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
-                    const lastName = p.Name.split(' ')[1] || p.Name;
-                    return `<div onclick="${sched ? `showAbsenceDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[8px] mb-1 ${sched ? 'text-red-500 font-bold cursor-pointer' : 'font-bold text-gray-700'}">
-                        <span>${lastName}</span>
-                        <span>${sched ? '❌' : '✅'}</span>
-                    </div>`;
-                }).join('');
+                // เช็คว่าถึงวันที่ 30 มีนาคม 2569 หรือยัง
+                const isStarted = current >= normalizeDate(startLimit);
+
+                let peopleList = '';
+                if(isStarted) {
+                    peopleList = rawStatus.map(p => {
+                        const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
+                        const nick = p.Name.split(' ')[1] || p.Name.split(' ')[0];
+                        return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold clickable-symbol' : 'font-bold text-gray-500'}">
+                            <span>${nick}</span>
+                            <span>${sched ? '❌' : '✅'}</span>
+                        </div>`;
+                    }).join('');
+                }
 
                 grid.innerHTML += `
-                    <div class="min-h-[100px] bg-white border border-gray-100 rounded-2xl p-2 flex flex-col ${isToday ? 'ring-2 ring-blue-500' : ''}">
-                        <div class="text-[10px] font-black mb-2 ${isToday ? 'text-blue-500' : 'text-gray-300'}">${d}</div>
+                    <div class="min-h-[75px] bg-white border border-gray-100 rounded-xl p-1 flex flex-col ${isToday ? 'ring-1 ring-blue-500' : ''}">
+                        <div class="text-[9px] font-black mb-1 ${isToday ? 'text-blue-500' : 'text-gray-200'}">${d}</div>
                         <div class="flex-1">${peopleList}</div>
                     </div>`;
             }
@@ -318,15 +316,15 @@
         async function submitAbsence() {
             const btn = document.getElementById('submitBtn');
             const data = { action: 'addAbsence', name: document.getElementById('adminNameSelect').value, startDate: document.getElementById('startDate').value, endDate: document.getElementById('endDate').value, reason: document.getElementById('reason').value };
-            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('Error', 'กรุณาระบุข้อมูลให้ครบถ้วน', 'warning');
+            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('Error', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
             btn.disabled = true; btn.innerHTML = 'กำลังบันทึก...';
             try {
                 await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
-                Swal.fire({ title: 'สำเร็จ!', icon: 'success', confirmButtonColor: '#007AFF' });
+                Swal.fire({ title: 'สำเร็จ', icon: 'success', confirmButtonColor: '#007AFF' });
                 document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; document.getElementById('reason').value = '';
                 await loadAllData();
                 showTab('home');
-            } catch (e) { Swal.fire('Error', 'บันทึกไม่สำเร็จ', 'error'); }
+            } catch (e) { Swal.fire('Error', 'ไม่สามารถบันทึกได้', 'error'); }
             finally { btn.disabled = false; btn.innerHTML = 'บันทึกข้อมูล'; }
         }
 
