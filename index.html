@@ -3,88 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SCiUSNU Director</title>
+    <title>Executive Hub - SCiUS NU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --biz-navy: #0f172a;
-            --biz-blue: #0284c7;
-            --biz-bg: #f8fafc;
-        }
-        body { 
-            font-family: 'Sarabun', -apple-system, sans-serif; 
-            background-color: var(--biz-bg); 
-            color: #1e293b;
-            overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวาที่ตัว Body */
-        }
-        .biz-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-bottom: 4px solid #f59e0b;
-        }
-        .tab-btn {
-            transition: all 0.3s ease;
-            font-weight: 800;
-        }
-        .tab-active {
-            color: #0f172a !important;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .executive-card {
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        /* 📱 ตารางแบบ Fixed ป้องกันการเลื่อน */
-        .status-table {
-            width: 100%;
-            table-layout: fixed; /* บังคับให้ขนาดคอลัมน์คงที่ตาม % */
-            border-collapse: collapse;
-        }
-        .name-cell {
-            width: 35%; /* พื้นที่ชื่อ-นามสกุล */
-            padding: 12px 8px !important;
-            text-align: left;
-            background-color: #ffffff;
-        }
-        .date-cell {
-            width: 13%; /* พื้นที่วันละ 13% x 5 วัน = 65% (รวมชื่อ 35% = 100% พอดี) */
-            padding: 10px 0 !important;
-            text-align: center;
-        }
-        .today-banner {
-            background-color: var(--biz-navy) !important;
-            color: white !important;
-        }
-        .today-column-bg {
-            background-color: rgba(2, 132, 199, 0.03) !important;
-        }
-        /* สถานะสีสดชัดเจน */
-        .vivid-tick {
-            color: #059669; /* Emerald-600 */
-            font-size: 1.4rem;
-            font-weight: bold;
-            opacity: 1 !important;
-        }
-        .vivid-cross {
-            color: #dc2626; /* Red-600 */
-            font-size: 1.4rem;
-            cursor: pointer;
-            opacity: 1 !important;
-        }
-        /* ปรับฟอนต์ชื่อในมือถือให้พอดี */
-        .exec-name {
-            font-size: 12px;
-            line-height: 1.2;
-            font-weight: 800;
-        }
-        @media (min-width: 768px) {
-            .exec-name { font-size: 15px; }
-        }
+        :root { --biz-navy: #0f172a; --biz-blue: #0284c7; --biz-bg: #f8fafc; }
+        body { font-family: 'Sarabun', -apple-system, sans-serif; background-color: var(--biz-bg); color: #1e293b; overflow-x: hidden; }
+        .biz-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid #f59e0b; }
+        .tab-btn { transition: all 0.3s ease; font-weight: 800; }
+        .tab-active { color: #0f172a !important; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .executive-card { background: #ffffff; border-radius: 24px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .status-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+        .name-cell { width: 35%; padding: 12px 8px !important; text-align: left; background-color: #ffffff; }
+        .date-cell { width: 13%; padding: 10px 0 !important; text-align: center; }
+        .today-banner { background-color: var(--biz-navy) !important; color: white !important; }
+        .today-column-bg { background-color: rgba(2, 132, 199, 0.03) !important; }
+        .vivid-tick { color: #059669; font-size: 1.4rem; font-weight: bold; opacity: 1 !important; }
+        .vivid-cross { color: #dc2626; font-size: 1.4rem; cursor: pointer; opacity: 1 !important; }
+        .exec-name { font-size: 12px; line-height: 1.2; font-weight: 800; }
+        @media (min-width: 768px) { .exec-name { font-size: 15px; } }
     </style>
 </head>
 <body class="pb-12">
@@ -96,7 +34,7 @@
                     <span class="text-slate-900 font-black text-lg md:text-xl">S</span>
                 </div>
                 <div>
-                    <h1 class="text-white font-extrabold text-sm md:text-lg leading-tight">ระบบปฏิบัติงานของผู้บริหารโครงการ วมว.มน.</h1>
+                    <h1 class="text-white font-extrabold text-sm md:text-lg leading-tight">Executive Plan</h1>
                     <p class="text-[8px] md:text-[10px] text-orange-400 font-bold uppercase tracking-widest leading-none">SCiUS Naresuan</p>
                 </div>
             </div>
@@ -111,9 +49,14 @@
     <main class="max-w-4xl mx-auto px-2 mt-6">
         
         <div id="tab-home" class="tab-content">
-            <div class="flex items-center justify-between mb-4 px-2">
+            <div class="flex items-end justify-between mb-4 px-2">
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tighter">แผนปฏิบัติงาน 5 วัน</h2>
-                <button onclick="loadAllData()" class="text-[10px] font-black bg-white border px-3 py-1 rounded-full shadow-sm">รีเฟรช</button>
+                <div class="flex gap-2">
+                    <button onclick="triggerLineNotify()" class="flex items-center gap-1 bg-[#00B900] text-white font-extrabold text-[10px] px-3 py-1.5 rounded-xl shadow-md hover:bg-green-600 transition-all active:scale-95">
+                        💬 แจ้ง LINE
+                    </button>
+                    <button onclick="loadAllData()" class="text-[10px] text-slate-600 font-black bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm hover:bg-slate-50 transition-all">🔄 รีเฟรช</button>
+                </div>
             </div>
             
             <div class="executive-card overflow-hidden">
@@ -164,7 +107,9 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzxT63E3SeiMZoWeK_KbVD1Ci8DHp6L_VzRFsE9tcF3cvB1d2VsoVr2hPj9tq3Azt4dgg/exec';
+        // 🔴🔴 URL ใหม่ที่คุณเพิ่งแนบมา 🔴🔴
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxVDT9VqwPFyqGmXaWg7g-YvHmcvxJoSaXpNt5gr3U3SsHelehrk0fUBcXLm_2tKz1oSA/exec';
+        
         let rawStatus = []; let rawSchedule = []; let viewDate = new Date(2026, 2, 30);
 
         async function loadAllData() {
@@ -216,7 +161,6 @@
                 temp.setDate(temp.getDate() + 1);
             }
 
-            // --- ส่วนหัวตาราง: ปรับขนาดให้เท่ากับคณะผู้บริหาร และหนาพิเศษ ---
             header.innerHTML = '<th class="name-cell font-extrabold text-slate-900 text-sm md:text-base">คณะผู้บริหาร</th>';
             dates.forEach((d, idx) => {
                 const isToday = normalizeDate(d) === normalizeDate(new Date());
@@ -276,14 +220,41 @@
 
         function changeMonth(s) { viewDate.setMonth(viewDate.getMonth() + s); renderCalendar(); }
         function populateAdminSelect() { document.getElementById('adminNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join(''); }
+        
         async function submitAbsence() {
             const btn = document.getElementById('submitBtn');
             const data = { action: 'addAbsence', name: document.getElementById('adminNameSelect').value, startDate: document.getElementById('startDate').value, endDate: document.getElementById('endDate').value, reason: document.getElementById('reason').value };
             if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('Error', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
             btn.disabled = true; btn.innerHTML = 'บันทึก...';
-            try { await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); Swal.fire({ title: 'สำเร็จ', icon: 'success', confirmButtonColor: '#0f172a' }); await loadAllData(); showTab('home'); } catch (e) { Swal.fire('Error', 'Error', 'error'); } 
+            try { await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); Swal.fire({ title: 'สำเร็จ', icon: 'success', confirmButtonColor: '#0f172a' }); document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; document.getElementById('reason').value = ''; await loadAllData(); showTab('home'); } catch (e) { Swal.fire('Error', 'Error', 'error'); } 
             finally { btn.disabled = false; btn.innerHTML = 'SUBMIT RECORD'; }
         }
+
+        async function triggerLineNotify() {
+            Swal.fire({
+                title: 'ยืนยันการแจ้งเตือน',
+                text: "ระบบจะทำการส่งสรุปสถานะของผู้บริหารประจำวันนี้เข้ากลุ่ม LINE",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#00B900',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'ส่งเลย',
+                cancelButtonText: 'ยกเลิก'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('loader').classList.remove('hidden');
+                    try {
+                        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'notifyLine' }) });
+                        Swal.fire({ title: 'ส่งสำเร็จ!', text: 'แจ้งเตือนถูกส่งเข้ากลุ่ม LINE เรียบร้อยแล้ว', icon: 'success', confirmButtonColor: '#0f172a' });
+                    } catch (e) {
+                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับ LINE ได้', 'error');
+                    } finally {
+                        document.getElementById('loader').classList.add('hidden');
+                    }
+                }
+            });
+        }
+
         loadAllData();
     </script>
 </body>
