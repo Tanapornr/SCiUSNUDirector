@@ -52,9 +52,6 @@
             <div class="flex items-end justify-between mb-4 px-2">
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tighter">แผนปฏิบัติงาน 5 วัน</h2>
                 <div class="flex gap-2">
-                    <button onclick="triggerLineNotify()" class="flex items-center gap-1 bg-[#00B900] text-white font-extrabold text-[10px] px-3 py-1.5 rounded-xl shadow-md hover:bg-green-600 transition-all active:scale-95">
-                        💬 แจ้ง LINE
-                    </button>
                     <button onclick="loadAllData()" class="text-[10px] text-slate-600 font-black bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm hover:bg-slate-50 transition-all">🔄 รีเฟรช</button>
                 </div>
             </div>
@@ -107,8 +104,8 @@
     </div>
 
     <script>
-        // 🔴🔴 URL ใหม่ของคุณ 🔴🔴
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxtut6AvG6ERWNiuWHqxA_k00md6wQM2Fp79XQsSXXiozLKINslwvzTrjR7hJI6OLzQjA/exec';
+        // 🔴🔴 URL ใหม่ที่ลบฟังก์ชัน LINE ออกจากหน้าเว็บแล้ว 🔴🔴
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzZew4dDJ_Dqg5RUGxhnaaa1FlX76465M7dNu0ZvoCcBVDplfyUW4awoaGDFPi41mrgnw/exec';
         
         let rawStatus = []; let rawSchedule = []; let viewDate = new Date(2026, 2, 30);
 
@@ -226,33 +223,20 @@
             const data = { action: 'addAbsence', name: document.getElementById('adminNameSelect').value, startDate: document.getElementById('startDate').value, endDate: document.getElementById('endDate').value, reason: document.getElementById('reason').value };
             if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('Error', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
             btn.disabled = true; btn.innerHTML = 'บันทึก...';
-            try { await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); Swal.fire({ title: 'สำเร็จ', icon: 'success', confirmButtonColor: '#0f172a' }); document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; document.getElementById('reason').value = ''; await loadAllData(); showTab('home'); } catch (e) { Swal.fire('Error', 'Error', 'error'); } 
-            finally { btn.disabled = false; btn.innerHTML = 'SUBMIT RECORD'; }
-        }
-
-        async function triggerLineNotify() {
-            Swal.fire({
-                title: 'ยืนยันการแจ้งเตือน',
-                text: "ระบบจะทำการส่งสรุปสถานะของผู้บริหารประจำวันนี้เข้ากลุ่ม LINE",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#00B900',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'ส่งเลย',
-                cancelButtonText: 'ยกเลิก'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('loader').classList.remove('hidden');
-                    try {
-                        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'notifyLine' }) });
-                        Swal.fire({ title: 'ส่งสำเร็จ!', text: 'แจ้งเตือนถูกส่งเข้ากลุ่ม LINE เรียบร้อยแล้ว', icon: 'success', confirmButtonColor: '#0f172a' });
-                    } catch (e) {
-                        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับ LINE ได้', 'error');
-                    } finally {
-                        document.getElementById('loader').classList.add('hidden');
-                    }
-                }
-            });
+            try { 
+                await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); 
+                Swal.fire({ title: 'สำเร็จ', icon: 'success', confirmButtonColor: '#0f172a' }); 
+                document.getElementById('startDate').value = ''; 
+                document.getElementById('endDate').value = ''; 
+                document.getElementById('reason').value = ''; 
+                await loadAllData(); 
+                showTab('home'); 
+            } catch (e) { 
+                Swal.fire('Error', 'Error', 'error'); 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerHTML = 'SUBMIT RECORD'; 
+            }
         }
 
         loadAllData();
