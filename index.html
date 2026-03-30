@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบปฏิบัติงานผู้บริหารโครงการ วมว.-มน.</title>
+    <title>ระบบปฏิบัติงานผู้บริหาร โครงการ วมว.-มน.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -34,7 +34,7 @@
                     <span class="text-slate-900 font-black text-lg md:text-xl">S</span>
                 </div>
                 <div>
-                    <h1 class="text-white font-extrabold text-sm md:text-lg leading-tight">การฏิบัติงานผู้บริหารโครงการ วมว.-มน.</h1>
+                    <h1 class="text-white font-extrabold text-sm md:text-lg leading-tight">Executive Plan</h1>
                     <p class="text-[8px] md:text-[10px] text-orange-400 font-bold uppercase tracking-widest leading-none">SCiUS Naresuan University</p>
                 </div>
             </div>
@@ -87,13 +87,28 @@
             <div class="max-w-sm mx-auto executive-card p-6">
                 <h2 class="text-xl font-extrabold text-slate-900 mb-6 border-l-4 border-orange-500 pl-3">ลงข้อมูลใหม่</h2>
                 <div class="space-y-4">
-                    <select id="adminNameSelect" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm shadow-inner"></select>
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="date" id="startDate" class="p-3 bg-slate-50 rounded-xl border-none font-bold text-xs shadow-inner">
-                        <input type="date" id="endDate" class="p-3 bg-slate-50 rounded-xl border-none font-bold text-xs shadow-inner">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">ชื่อผู้บริหาร</label>
+                        <select id="adminNameSelect" class="w-full p-4 bg-slate-50 text-slate-900 rounded-2xl border-none font-bold text-sm shadow-inner"></select>
                     </div>
-                    <input type="text" id="reason" placeholder="เหตุผล (เช่น ไปราชการ กทม.)" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm shadow-inner">
-                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl active:scale-95 transition-all text-sm uppercase">Submit Record</button>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">เริ่มวันที่</label>
+                            <input type="date" id="startDate" class="w-full p-3 bg-slate-50 text-slate-900 rounded-xl border-none font-bold text-sm shadow-inner">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">ถึงวันที่</label>
+                            <input type="date" id="endDate" class="w-full p-3 bg-slate-50 text-slate-900 rounded-xl border-none font-bold text-sm shadow-inner">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">หมายเหตุ</label>
+                        <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full p-4 bg-slate-50 text-slate-900 rounded-2xl border-none font-bold text-sm shadow-inner">
+                    </div>
+
+                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl active:scale-95 transition-all text-sm uppercase mt-2">Submit Record</button>
                 </div>
             </div>
         </div>
@@ -104,7 +119,6 @@
     </div>
 
     <script>
-        // 🔴🔴 URL ใหม่ที่ลบฟังก์ชัน LINE ออกจากหน้าเว็บแล้ว 🔴🔴
         const API_URL = 'https://script.google.com/macros/s/AKfycbyNlXg6nQwnOf44LdR97Mupqe26ofO1HEEBO4iDw3xj58KqmXWTCYUjeR6h_GIqK3QaNQ/exec';
         
         let rawStatus = []; let rawSchedule = []; let viewDate = new Date(2026, 2, 30);
