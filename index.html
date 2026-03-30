@@ -27,10 +27,6 @@
         /* แก้ปัญหาช่อง Date Input ว่างเปล่าบนมือถือ */
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 1; display: block; cursor: pointer; }
         input[type="date"], input[type="text"].date-hack { color: #1e293b !important; appearance: none; -webkit-appearance: none; }
-        
-        /* สไตล์ของปุ่มเมนูย่อยในหน้าจัดการ */
-        .sub-tab-btn { transition: all 0.2s ease; border-bottom: 3px solid transparent; }
-        .sub-tab-active { color: #0284c7 !important; border-bottom-color: #0284c7 !important; background-color: #f0f9ff; }
     </style>
 </head>
 <body class="pb-12">
@@ -46,10 +42,11 @@
                     <p class="text-[8px] md:text-[10px] text-orange-400 font-bold uppercase tracking-widest leading-none">SCiUS Naresuan</p>
                 </div>
             </div>
-            <div class="flex bg-black/20 p-1 rounded-xl">
-                <button id="btn-home" onclick="showTab('home')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60 tab-active">สถานะ</button>
-                <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60">ปฏิทิน</button>
-                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60 bg-red-500/20 text-red-100 flex items-center gap-1">🔒 จัดการ</button>
+            <div class="flex bg-black/20 p-1 rounded-xl gap-0.5 overflow-x-auto">
+                <button id="btn-home" onclick="showTab('home')" class="tab-btn px-2.5 py-1.5 text-[10px] md:text-xs text-white/60 tab-active whitespace-nowrap">สถานะ</button>
+                <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-2.5 py-1.5 text-[10px] md:text-xs text-white/60 whitespace-nowrap">ปฏิทิน</button>
+                <button id="btn-add" onclick="showTab('add')" class="tab-btn px-2.5 py-1.5 text-[10px] md:text-xs text-white/60 whitespace-nowrap">ลงข้อมูล</button>
+                <button id="btn-edit" onclick="showTab('edit')" class="tab-btn px-2.5 py-1.5 text-[10px] md:text-xs text-white/60 bg-red-500/20 text-red-100 rounded-lg flex items-center gap-1 whitespace-nowrap">🔒 แก้ไข</button>
             </div>
         </div>
     </header>
@@ -59,18 +56,14 @@
         <div id="tab-home" class="tab-content">
             <div class="flex items-end justify-between mb-4 px-2">
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tighter">แผนปฏิบัติงาน 5 วัน</h2>
-                <div class="flex gap-2">
-                    <button onclick="forceRefresh()" class="text-[10px] text-slate-600 font-black bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm hover:bg-slate-50 transition-all">🔄 รีเฟรช</button>
-                </div>
+                <button onclick="forceRefresh()" class="text-[10px] text-slate-600 font-black bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm hover:bg-slate-50 transition-all">🔄 รีเฟรช</button>
             </div>
-            
             <div class="executive-card overflow-hidden">
                 <table class="status-table">
                     <thead><tr id="tableHeader" class="bg-gray-100/50 border-b border-gray-100"></tr></thead>
                     <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
-            
             <div class="mt-8 flex flex-wrap justify-center gap-4 text-[10px] font-bold text-slate-500">
                 <div class="flex items-center gap-1"><span class="vivid-tick text-base">✅</span> อยู่ปฏิบัติงาน</div>
                 <div class="flex items-center gap-1"><span class="vivid-cross text-base">❌</span> ลา/ราชการ (คลิก)</div>
@@ -89,70 +82,84 @@
             </div>
         </div>
 
-        <div id="tab-admin" class="tab-content hidden px-2">
-            <div class="max-w-md mx-auto">
-                <div class="bg-slate-900 text-white p-4 rounded-t-2xl flex justify-between items-center shadow-md relative z-10">
+        <div id="tab-add" class="tab-content hidden px-2">
+            <div class="max-w-sm mx-auto executive-card p-6 border-t-4 border-blue-500">
+                <h2 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-2">➕ ลงข้อมูลการลา</h2>
+                <div class="space-y-4">
                     <div>
-                        <h2 class="font-extrabold text-lg flex items-center gap-2">🛡️ Admin Panel</h2>
-                        <p class="text-[10px] text-slate-400">ระบบจัดการข้อมูลส่วนบุคคล</p>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">ชื่อผู้บริหาร</label>
+                        <select id="addNameSelect" class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"></select>
                     </div>
-                    <span class="text-[9px] bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-1 rounded-md font-bold">🟢 SECURE</span>
-                </div>
-                
-                <div class="bg-white border-x border-slate-200 flex shadow-sm relative z-0">
-                    <button onclick="showAdminSub('add')" id="subbtn-add" class="sub-tab-btn sub-tab-active flex-1 py-3 text-xs font-bold text-slate-600 flex items-center justify-center gap-1.5">
-                        <span class="text-base">➕</span> เพิ่มข้อมูล
-                    </button>
-                    <button onclick="showAdminSub('manage')" id="subbtn-manage" class="sub-tab-btn flex-1 py-3 text-xs font-bold text-slate-600 flex items-center justify-center gap-1.5 border-l border-slate-100">
-                        <span class="text-base">⚙️</span> ประวัติ / แก้ไข / ลบ
-                    </button>
-                </div>
-
-                <div class="bg-white p-5 rounded-b-2xl shadow-lg border border-t-0 border-slate-200">
-                    
-                    <div id="admin-view-add" class="space-y-4 block">
-                        <h3 id="adminFormTitle" class="text-sm font-extrabold text-slate-800 border-l-4 border-blue-500 pl-2 mb-4">ฟอร์มบันทึกข้อมูลใหม่</h3>
-                        
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">ชื่อผู้บริหาร</label>
-                            <select id="adminNameSelect" class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"></select>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">เริ่มวันที่</label>
+                            <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="addStartDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none">
                         </div>
-                        
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-500 mb-1 block">เริ่มวันที่</label>
-                                <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="startDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-500 mb-1 block">ถึงวันที่</label>
-                                <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="endDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            </div>
-                        </div>
-                        
                         <div>
-                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">หมายเหตุ</label>
-                            <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        </div>
-
-                        <div class="pt-2">
-                            <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl active:scale-95 transition-all text-sm uppercase shadow-md hover:bg-blue-700">SUBMIT RECORD</button>
-                            <button id="cancelEditBtn" onclick="cancelEdit()" class="w-full bg-slate-100 text-slate-500 font-black py-3 rounded-xl active:scale-95 transition-all text-xs uppercase hidden mt-2 hover:bg-slate-200">ยกเลิกการแก้ไข</button>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">ถึงวันที่</label>
+                            <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="addEndDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none">
                         </div>
                     </div>
-
-                    <div id="admin-view-manage" class="hidden">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-sm font-extrabold text-slate-800 border-l-4 border-orange-500 pl-2">ประวัติการลาในระบบ</h3>
-                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold" id="recordCount">0 รายการ</span>
-                        </div>
-                        
-                        <div id="adminRecordList" class="space-y-3 max-h-[400px] overflow-y-auto pr-1 pb-4">
-                            </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">หมายเหตุ</label>
+                        <input type="text" id="addReason" placeholder="เช่น ไปราชการ กทม." class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none">
                     </div>
-
+                    <button onclick="submitAdd()" id="btnAddSubmit" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl active:scale-95 transition-all text-sm uppercase mt-4 shadow-lg hover:bg-slate-800">บันทึกข้อมูล</button>
                 </div>
             </div>
         </div>
+
+        <div id="tab-edit" class="tab-content hidden px-1">
+            <div class="max-w-lg mx-auto">
+                
+                <div id="editFormBlock" class="hidden bg-white p-5 rounded-2xl shadow-lg border-t-4 border-orange-500 mb-6">
+                    <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1 mb-4">✏️ กำลังแก้ไขข้อมูลของ: <span id="editNameDisplay" class="text-orange-600"></span></h3>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">เริ่มวันที่ใหม่</label>
+                            <input type="text" placeholder="เลือกวัน" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="editStartDate" class="date-hack w-full p-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">ถึงวันที่ใหม่</label>
+                            <input type="text" placeholder="เลือกวัน" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="editEndDate" class="date-hack w-full p-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">หมายเหตุใหม่</label>
+                        <input type="text" id="editReason" class="w-full p-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="submitEdit()" id="btnEditSubmit" class="flex-1 bg-orange-500 text-white font-black py-3 rounded-xl active:scale-95 transition-all text-xs uppercase shadow-md hover:bg-orange-600">อัปเดตข้อมูล</button>
+                        <button onclick="cancelEdit()" class="w-1/3 bg-slate-200 text-slate-600 font-black py-3 rounded-xl active:scale-95 transition-all text-xs uppercase hover:bg-slate-300">ยกเลิก</button>
+                    </div>
+                </div>
+
+                <div class="executive-card p-4">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                        <h2 class="text-lg font-extrabold text-slate-900">ตารางจัดการข้อมูล</h2>
+                        <span class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded-md font-bold">Admin Mode</span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[300px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-[10px] text-slate-500 uppercase border-b border-slate-200">
+                                    <th class="p-2.5 rounded-tl-lg font-bold">ข้อมูลการลา</th>
+                                    <th class="p-2.5 font-bold">วันที่</th>
+                                    <th class="p-2.5 rounded-tr-lg font-bold text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="editTableBody" class="text-xs divide-y divide-slate-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </main>
 
     <div id="loader" class="fixed inset-0 bg-white/70 backdrop-blur-md z-[100] flex items-center justify-center hidden">
@@ -163,19 +170,22 @@
     </div>
 
     <script>
+        // 🔴🔴 URL API ของคุณ 🔴🔴
         const API_URL = 'https://script.google.com/macros/s/AKfycbwfqxOQk28891H2JnmnNetSgUmTLUyAD6cjj05OSXocSYWZeIuoT5S1f8_tqrot-gBAPg/exec';
         
         let rawStatus = []; let rawSchedule = []; let viewDate = new Date(2026, 2, 30);
         let isAdminAuthed = false; 
-        let editRowId = null; 
+        let currentEditRowIndex = null;
+        let currentEditName = "";
 
+        // 🚀 ระบบโหลดข้อมูล (Cache)
         async function loadAllData(force = false) {
             const cachedStatus = localStorage.getItem('sciStatus');
             const cachedSchedule = localStorage.getItem('sciSchedule');
             
             if (cachedStatus && cachedSchedule && !force) {
                 rawStatus = JSON.parse(cachedStatus); rawSchedule = JSON.parse(cachedSchedule);
-                renderHome(); renderCalendar(); populateAdminSelect(); renderAdminList();
+                renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } else { document.getElementById('loader').classList.remove('hidden'); }
 
             try {
@@ -188,7 +198,7 @@
                 localStorage.setItem('sciStatus', JSON.stringify(rawStatus));
                 localStorage.setItem('sciSchedule', JSON.stringify(rawSchedule));
                 
-                renderHome(); renderCalendar(); populateAdminSelect(); renderAdminList();
+                renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } catch (e) { 
                 if (!cachedStatus) Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error'); 
             } finally { document.getElementById('loader').classList.add('hidden'); }
@@ -196,24 +206,24 @@
 
         function forceRefresh() { loadAllData(true); }
 
-        // 🔐 ระบบพาสเวิร์ด
+        // 🔐 ระบบเปลี่ยนแท็บ & ตรวจสอบรหัสผ่านเจ้าหน้าที่
         async function showTab(id) {
-            if (id === 'admin' && !isAdminAuthed) {
+            if (id === 'edit' && !isAdminAuthed) {
                 const { value: password } = await Swal.fire({
-                    title: '🔒 เข้าสู่ระบบแอดมิน',
+                    title: '🔒 โหมดเจ้าหน้าที่',
                     input: 'password',
-                    inputPlaceholder: 'กรอกรหัสผ่าน 4 หลัก',
+                    inputPlaceholder: 'กรอกรหัส 1234',
                     showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
+                    confirmButtonText: 'เข้าสู่ระบบ',
                     cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#0f172a'
+                    confirmButtonColor: '#ef4444'
                 });
                 
-                if (password === '1234') { // รหัสผ่านคือ 1234
+                if (password === '1234') { 
                     isAdminAuthed = true;
-                    Swal.fire({ title: 'ยืนยันตัวตนสำเร็จ', text: 'ยินดีต้อนรับเข้าสู่ระบบจัดการ', icon: 'success', timer: 1200, showConfirmButton: false });
+                    Swal.fire({ title: 'สำเร็จ', text: 'เข้าสู่โหมดจัดการข้อมูล', icon: 'success', timer: 1000, showConfirmButton: false });
                 } else {
-                    if (password) Swal.fire('รหัสผ่านผิด!', 'คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'error');
+                    if (password) Swal.fire('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง', 'error');
                     return; 
                 }
             }
@@ -222,23 +232,11 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
             document.getElementById(`tab-${id}`).classList.remove('hidden');
             document.getElementById(`btn-${id}`).classList.add('tab-active');
+            
+            // ถ้าย้ายหน้า ให้ซ่อนฟอร์มแก้ไขอัตโนมัติ
+            if(id !== 'edit') cancelEdit();
         }
 
-        // 🔄 ระบบสลับเมนูย่อยในหน้า Admin
-        function showAdminSub(mode) {
-            // ล้างสถานะปุ่ม
-            document.getElementById('subbtn-add').classList.remove('sub-tab-active');
-            document.getElementById('subbtn-manage').classList.remove('sub-tab-active');
-            // ซ่อนเนื้อหาทั้งหมด
-            document.getElementById('admin-view-add').classList.add('hidden');
-            document.getElementById('admin-view-manage').classList.add('hidden');
-
-            // แสดงเฉพาะอันที่เลือก
-            document.getElementById(`subbtn-${mode}`).classList.add('sub-tab-active');
-            document.getElementById(`admin-view-${mode}`).classList.remove('hidden');
-        }
-
-        // ฟังก์ชันทั่วไป
         function normalizeDate(d) { if(!d) return null; const date = new Date(d); date.setHours(0,0,0,0); return date.getTime(); }
 
         function showDetail(name, reason, start, end) {
@@ -251,6 +249,7 @@
             });
         }
 
+        /* ---------------- ฟังก์ชันการเรนเดอร์หน้าจอ ---------------- */
         function renderHome() {
             const header = document.getElementById('tableHeader'); const body = document.getElementById('tableBody');
             const dates = []; let startLimit = new Date(2026, 2, 30); let today = new Date(); let temp = (today > startLimit) ? today : new Date(startLimit);
@@ -298,129 +297,152 @@
         }
 
         function changeMonth(s) { viewDate.setMonth(viewDate.getMonth() + s); renderCalendar(); }
-        function populateAdminSelect() { document.getElementById('adminNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join(''); }
+        function populateAddSelect() { document.getElementById('addNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join(''); }
 
-        // 📌 สร้างรายการลบ/แก้ไข ในแถบ 'จัดการข้อมูล'
-        function renderAdminList() {
-            const list = document.getElementById('adminRecordList');
-            const countLabel = document.getElementById('recordCount');
-            if(!list) return;
+        // 📌 สร้างตารางหน้าแก้ไข (แสดงเฉพาะเมื่อล็อกอินแล้ว)
+        function renderEditTable() {
+            const tbody = document.getElementById('editTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
             
-            list.innerHTML = '';
-            const validSchedules = rawSchedule.filter(s => s.Name && s._rowIndex); // คัดเฉพาะอันที่มีข้อมูล
-            countLabel.innerText = `${validSchedules.length} รายการ`;
+            const validSchedules = rawSchedule.filter(s => s.Name && s._rowIndex);
+            const sortedSchedule = [...validSchedules].reverse(); // เอาล่าสุดขึ้นบน
             
-            const sortedSchedule = [...validSchedules].reverse(); // เอาล่าสุดขึ้นก่อน
+            if(sortedSchedule.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400 text-[10px]">ไม่มีข้อมูลการลา</td></tr>`;
+                return;
+            }
+
             sortedSchedule.forEach(s => {
-                const sd = new Date(s.StartDate).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
-                const ed = new Date(s.EndDate).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
+                const sd = new Date(s.StartDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+                const ed = new Date(s.EndDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'});
                 
-                list.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <div class="w-2/3 pr-2">
-                            <p class="text-xs font-black text-slate-900 truncate">${s.Name}</p>
-                            <p class="text-[10px] text-slate-500 mt-1"><span class="font-bold">วันที่:</span> ${sd} - ${ed}</p>
-                            <p class="text-[10px] text-orange-600 font-bold mt-0.5 truncate"><span class="text-slate-400">เหตุผล:</span> ${s.Reason}</p>
-                        </div>
-                        <div class="flex flex-col gap-2 w-1/3">
-                            <button onclick="prepareEdit(${s._rowIndex}, '${s.Name}', '${s.Reason}')" class="text-[10px] w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-1.5 rounded-lg font-bold transition">✏️ แก้ไข</button>
-                            <button onclick="deleteRecord(${s._rowIndex})" class="text-[10px] w-full bg-red-100 hover:bg-red-200 text-red-600 py-1.5 rounded-lg font-bold transition">🗑️ ลบ</button>
-                        </div>
-                    </div>
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-2.5 py-3">
+                            <div class="font-bold text-slate-900 whitespace-nowrap">${s.Name.split(' ')[0]}</div>
+                            <div class="text-[9px] font-bold text-orange-600 truncate max-w-[120px]" title="${s.Reason}">${s.Reason}</div>
+                        </td>
+                        <td class="p-2.5 text-[10px] text-slate-600 font-bold whitespace-nowrap">
+                            ${sd} - ${ed}
+                        </td>
+                        <td class="p-2.5 text-center whitespace-nowrap">
+                            <button onclick="openEditForm(${s._rowIndex}, '${s.Name}', '${s.Reason}')" class="p-2 bg-slate-100 rounded-lg text-slate-600 shadow-sm hover:bg-orange-100 hover:text-orange-600 transition-colors mr-1">✏️</button>
+                            <button onclick="deleteRecord(${s._rowIndex})" class="p-2 bg-red-50 rounded-lg text-red-500 shadow-sm hover:bg-red-500 hover:text-white transition-colors">❌</button>
+                        </td>
+                    </tr>
                 `;
             });
+        }
+
+        /* ---------------- ระบบจัดการ (เพิ่ม / ลบ / แก้ไข) ---------------- */
+        
+        // ➕ ฟังก์ชันเพิ่มข้อมูล (แถบลงข้อมูล)
+        async function submitAdd() {
+            const btn = document.getElementById('btnAddSubmit');
+            const data = { 
+                action: 'addAbsence', 
+                name: document.getElementById('addNameSelect').value, 
+                startDate: document.getElementById('addStartDate').value, 
+                endDate: document.getElementById('addEndDate').value, 
+                reason: document.getElementById('addReason').value 
+            };
             
-            if(validSchedules.length === 0) {
-                list.innerHTML = '<p class="text-xs text-center text-slate-400 py-6">ไม่มีประวัติการลาในระบบ</p>';
+            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกวันที่และหมายเหตุ', 'warning');
+            
+            btn.disabled = true; btn.innerHTML = 'กำลังบันทึก...';
+            try { 
+                await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); 
+                Swal.fire({ title: 'สำเร็จ!', icon: 'success', confirmButtonColor: '#0f172a' }); 
+                // ล้างช่องกรอก
+                document.getElementById('addStartDate').value = ''; 
+                document.getElementById('addEndDate').value = ''; 
+                document.getElementById('addReason').value = ''; 
+                
+                await loadAllData(true); 
+                showTab('home'); // กลับไปหน้าสถานะ
+            } catch (e) { 
+                Swal.fire('Error', 'เกิดข้อผิดพลาดในการส่งข้อมูล', 'error'); 
+            } finally { 
+                btn.disabled = false; btn.innerHTML = 'บันทึกข้อมูล'; 
             }
         }
 
-        // 🗑️ ลบข้อมูล
+        // ❌ (กากบาท) ฟังก์ชันลบข้อมูล
         async function deleteRecord(rowIndex) {
-            const res = await Swal.fire({ title: 'ยืนยันการลบ?', text: "ต้องการลบประวัตินี้ใช่หรือไม่?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ลบข้อมูล' });
+            const res = await Swal.fire({ 
+                title: 'ยกเลิกการลา?', 
+                text: "ลบรายการนี้แล้ว สถานะจะกลับไปเป็น ✅ ปฏิบัติงาน", 
+                icon: 'warning', 
+                showCancelButton: true, 
+                confirmButtonColor: '#ef4444', 
+                confirmButtonText: 'ลบเลย!' 
+            });
             if(!res.isConfirmed) return;
             
             document.getElementById('loader').classList.remove('hidden');
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteAbsence', rowIndex: rowIndex }) });
-                Swal.fire('สำเร็จ', 'ลบข้อมูลเรียบร้อย', 'success');
-                await loadAllData(true); 
+                Swal.fire('สำเร็จ', 'ข้อมูลถูกยกเลิกแล้ว', 'success');
+                await loadAllData(true); // โหลดใหม่เพื่อให้หน้าสถานะกลับเป็นติ๊กถูก
             } catch(e) { 
                 Swal.fire('Error', 'ไม่สามารถลบข้อมูลได้', 'error'); 
                 document.getElementById('loader').classList.add('hidden'); 
             }
         }
 
-        // ✏️ เตรียมข้อมูลเพื่อแก้ไข
-        function prepareEdit(rowIndex, name, reason) {
-            editRowId = rowIndex; 
-            document.getElementById('adminNameSelect').value = name;
-            document.getElementById('reason').value = reason;
+        // ✏️ (ดินสอ) กดเพื่อเปิดกล่องแก้ไขข้อมูล
+        function openEditForm(rowIndex, name, reason) {
+            currentEditRowIndex = rowIndex;
+            currentEditName = name;
             
-            // ล้างวันที่เดิม บังคับให้จิ้มเลือกปฏิทินใหม่
-            document.getElementById('startDate').value = ''; document.getElementById('startDate').type = 'text';
-            document.getElementById('endDate').value = ''; document.getElementById('endDate').type = 'text';
+            // นำข้อมูลไปใส่ในกล่อง Edit
+            document.getElementById('editNameDisplay').innerText = name;
+            document.getElementById('editReason').value = reason;
             
-            // เปลี่ยนหน้าตาฟอร์มให้เป็นโหมดแก้ไข
-            document.getElementById('adminFormTitle').innerText = 'แก้ไขข้อมูลการลา (เลือกวันที่ใหม่)';
-            document.getElementById('adminFormTitle').classList.replace('border-blue-500', 'border-orange-500');
+            // ล้างวันที่ บังคับให้จิ้มเลือกปฏิทินใหม่เพื่อความแม่นยำ
+            document.getElementById('editStartDate').value = ''; document.getElementById('editStartDate').type = 'text';
+            document.getElementById('editEndDate').value = ''; document.getElementById('editEndDate').type = 'text';
             
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = 'UPDATE RECORD (บันทึกการแก้ไข)';
-            btn.classList.replace('bg-blue-600', 'bg-orange-500');
-            btn.classList.replace('hover:bg-blue-700', 'hover:bg-orange-600');
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-            
-            // สลับกลับไปที่หน้าต่าง Add/Edit อัตโนมัติ
-            showAdminSub('add');
+            // โชว์กล่องฟอร์มแก้ไข และเลื่อนจอขึ้นไปด้านบน
+            document.getElementById('editFormBlock').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ❌ ยกเลิกการแก้ไข
+        // ปิดกล่องแก้ไข
         function cancelEdit() {
-            editRowId = null;
-            document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; document.getElementById('reason').value = '';
-            
-            document.getElementById('adminFormTitle').innerText = 'ฟอร์มบันทึกข้อมูลใหม่';
-            document.getElementById('adminFormTitle').classList.replace('border-orange-500', 'border-blue-500');
-            
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = 'SUBMIT RECORD';
-            btn.classList.replace('bg-orange-500', 'bg-blue-600');
-            btn.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
-            document.getElementById('cancelEditBtn').classList.add('hidden');
+            currentEditRowIndex = null;
+            document.getElementById('editFormBlock').classList.add('hidden');
         }
-        
-        // 💾 ฟังก์ชันบันทึก
-        async function submitAbsence() {
-            const btn = document.getElementById('submitBtn');
-            const actionType = editRowId ? 'editAbsence' : 'addAbsence';
-            
+
+        // 💾 ฟังก์ชันกดอัปเดตข้อมูล (ส่งกลับไปทับแถวเดิม)
+        async function submitEdit() {
+            const btn = document.getElementById('btnEditSubmit');
             const data = { 
-                action: actionType, 
-                rowIndex: editRowId, 
-                name: document.getElementById('adminNameSelect').value, 
-                startDate: document.getElementById('startDate').value, 
-                endDate: document.getElementById('endDate').value, 
-                reason: document.getElementById('reason').value 
+                action: 'editAbsence', 
+                rowIndex: currentEditRowIndex,
+                name: currentEditName, 
+                startDate: document.getElementById('editStartDate').value, 
+                endDate: document.getElementById('editEndDate').value, 
+                reason: document.getElementById('editReason').value 
             };
             
-            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกวันที่และเหตุผลให้ครบถ้วน', 'warning');
+            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกวันที่ใหม่ให้ครบถ้วน', 'warning');
             
-            btn.disabled = true; btn.innerHTML = 'กำลังประมวลผล...';
+            btn.disabled = true; btn.innerHTML = 'กำลังอัปเดต...';
             try { 
                 await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); 
-                Swal.fire({ title: 'บันทึกสำเร็จ', icon: 'success', confirmButtonColor: '#0f172a' }); 
+                Swal.fire({ title: 'อัปเดตสำเร็จ!', icon: 'success', confirmButtonColor: '#f97316' }); 
                 cancelEdit(); 
                 await loadAllData(true); 
-                showTab('home'); 
             } catch (e) { 
-                Swal.fire('Error', 'ไม่สามารถบันทึกข้อมูลได้', 'error'); 
+                Swal.fire('Error', 'ไม่สามารถอัปเดตข้อมูลได้', 'error'); 
             } finally { 
-                btn.disabled = false; 
-                btn.innerHTML = editRowId ? 'UPDATE RECORD' : 'SUBMIT RECORD'; 
+                btn.disabled = false; btn.innerHTML = 'อัปเดตข้อมูล'; 
             }
         }
 
+        // เริ่มต้นโหลดข้อมูล
         loadAllData();
     </script>
 </body>
