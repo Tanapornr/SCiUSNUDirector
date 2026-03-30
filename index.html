@@ -24,7 +24,6 @@
         .exec-name { font-size: 12px; line-height: 1.2; font-weight: 800; }
         @media (min-width: 768px) { .exec-name { font-size: 15px; } }
         
-        /* แก้ปัญหาช่อง Date Input ว่างเปล่าบนมือถือ */
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 1; display: block; cursor: pointer; }
         input[type="date"], input[type="text"].date-hack { color: #1e293b !important; appearance: none; -webkit-appearance: none; }
     </style>
@@ -56,7 +55,9 @@
         <div id="tab-home" class="tab-content">
             <div class="flex items-end justify-between mb-4 px-2">
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tighter">แผนปฏิบัติงาน 5 วัน</h2>
-                <button onclick="forceRefresh()" class="text-[10px] text-slate-600 font-black bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm hover:bg-slate-50 transition-all">🔄 รีเฟรช</button>
+                <div class="flex items-center gap-1.5 text-[10px] text-emerald-600 font-black bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 rounded-lg shadow-sm">
+                    <span class="animate-pulse text-emerald-500">●</span> Real-time
+                </div>
             </div>
             <div class="executive-card overflow-hidden">
                 <table class="status-table">
@@ -139,7 +140,10 @@
                 <div class="executive-card p-4">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
                         <h2 class="text-lg font-extrabold text-slate-900">ตารางจัดการข้อมูล</h2>
-                        <span class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded-md font-bold">Admin Mode</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded-md font-bold hidden md:inline-block">Admin Mode</span>
+                            <button onclick="logoutAdmin()" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded-md font-bold transition-all">ออกจากระบบ</button>
+                        </div>
                     </div>
                     
                     <div class="overflow-x-auto">
@@ -165,7 +169,7 @@
     <div id="loader" class="fixed inset-0 bg-white/70 backdrop-blur-md z-[100] flex items-center justify-center hidden">
         <div class="flex flex-col items-center">
             <div class="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-            <p class="mt-4 text-xs font-bold text-slate-600">กำลังซิงค์ข้อมูล...</p>
+            <p class="mt-4 text-xs font-bold text-slate-600">กำลังประมวลผล...</p>
         </div>
     </div>
 
@@ -178,15 +182,21 @@
         let currentEditRowIndex = null;
         let currentEditName = "";
 
-        // 🚀 ระบบโหลดข้อมูล (Cache)
-        async function loadAllData(force = false) {
+        // 🚀 ระบบโหลดข้อมูล (ดึงแบบเงียบๆ ไม่ให้กวนหน้าจอได้)
+        async function loadAllData(force = false, silent = false) {
             const cachedStatus = localStorage.getItem('sciStatus');
             const cachedSchedule = localStorage.getItem('sciSchedule');
             
+            // แสดงข้อมูลจาก Cache ทันทีที่เข้าเว็บ
             if (cachedStatus && cachedSchedule && !force) {
                 rawStatus = JSON.parse(cachedStatus); rawSchedule = JSON.parse(cachedSchedule);
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
-            } else { document.getElementById('loader').classList.remove('hidden'); }
+            } 
+            
+            // ถ้าไม่ได้สั่งให้ดึงแบบเงียบ (silent) ให้แสดงหน้าต่างโหลด
+            if (!silent && (!cachedStatus || force)) { 
+                document.getElementById('loader').classList.remove('hidden'); 
+            }
 
             try {
                 const [res1, res2] = await Promise.all([
@@ -200,19 +210,24 @@
                 
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } catch (e) { 
-                if (!cachedStatus) Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error'); 
-            } finally { document.getElementById('loader').classList.add('hidden'); }
+                // ซ่อน Error กรณีดึงเงียบๆ ป้องกันป๊อปอัปเด้งกวนใจ
+                if (!silent && !cachedStatus) Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error'); 
+            } finally { 
+                document.getElementById('loader').classList.add('hidden'); 
+            }
         }
 
-        function forceRefresh() { loadAllData(true); }
+        // ⏱️ ระบบ Real-time: ดึงข้อมูลใหม่เงียบๆ ทุกๆ 30 วินาที
+        setInterval(() => {
+            loadAllData(true, true);
+        }, 30000);
 
         // 🔐 ระบบเปลี่ยนแท็บ & ตรวจสอบรหัสผ่านเจ้าหน้าที่
         async function showTab(id) {
             if (id === 'edit' && !isAdminAuthed) {
                 const { value: password } = await Swal.fire({
-                    title: '🔒 โหมดเจ้าหน้าที่',
+                    title: '🔒 สำหรับเจ้าหน้าที่',
                     input: 'password',
-                    inputPlaceholder: 'กรอกรหัส 1234',
                     showCancelButton: true,
                     confirmButtonText: 'เข้าสู่ระบบ',
                     cancelButtonText: 'ยกเลิก',
@@ -221,7 +236,7 @@
                 
                 if (password === '1234') { 
                     isAdminAuthed = true;
-                    Swal.fire({ title: 'สำเร็จ', text: 'เข้าสู่โหมดจัดการข้อมูล', icon: 'success', timer: 1000, showConfirmButton: false });
+                    Swal.fire({ title: 'เข้าสู่ระบบสำเร็จ', icon: 'success', timer: 1000, showConfirmButton: false });
                 } else {
                     if (password) Swal.fire('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง', 'error');
                     return; 
@@ -233,8 +248,15 @@
             document.getElementById(`tab-${id}`).classList.remove('hidden');
             document.getElementById(`btn-${id}`).classList.add('tab-active');
             
-            // ถ้าย้ายหน้า ให้ซ่อนฟอร์มแก้ไขอัตโนมัติ
             if(id !== 'edit') cancelEdit();
+        }
+
+        // 🚪 ออกจากระบบ Admin
+        function logoutAdmin() {
+            isAdminAuthed = false;
+            cancelEdit();
+            Swal.fire({ title: 'ออกจากระบบเรียบร้อย', icon: 'success', timer: 1000, showConfirmButton: false });
+            showTab('home'); // เด้งกลับไปหน้าแรก
         }
 
         function normalizeDate(d) { if(!d) return null; const date = new Date(d); date.setHours(0,0,0,0); return date.getTime(); }
@@ -299,14 +321,13 @@
         function changeMonth(s) { viewDate.setMonth(viewDate.getMonth() + s); renderCalendar(); }
         function populateAddSelect() { document.getElementById('addNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join(''); }
 
-        // 📌 สร้างตารางหน้าแก้ไข (แสดงเฉพาะเมื่อล็อกอินแล้ว)
         function renderEditTable() {
             const tbody = document.getElementById('editTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
             
             const validSchedules = rawSchedule.filter(s => s.Name && s._rowIndex);
-            const sortedSchedule = [...validSchedules].reverse(); // เอาล่าสุดขึ้นบน
+            const sortedSchedule = [...validSchedules].reverse(); 
             
             if(sortedSchedule.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400 text-[10px]">ไม่มีข้อมูลการลา</td></tr>`;
@@ -337,7 +358,6 @@
 
         /* ---------------- ระบบจัดการ (เพิ่ม / ลบ / แก้ไข) ---------------- */
         
-        // ➕ ฟังก์ชันเพิ่มข้อมูล (แถบลงข้อมูล)
         async function submitAdd() {
             const btn = document.getElementById('btnAddSubmit');
             const data = { 
@@ -354,13 +374,12 @@
             try { 
                 await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); 
                 Swal.fire({ title: 'สำเร็จ!', icon: 'success', confirmButtonColor: '#0f172a' }); 
-                // ล้างช่องกรอก
                 document.getElementById('addStartDate').value = ''; 
                 document.getElementById('addEndDate').value = ''; 
                 document.getElementById('addReason').value = ''; 
                 
                 await loadAllData(true); 
-                showTab('home'); // กลับไปหน้าสถานะ
+                showTab('home'); 
             } catch (e) { 
                 Swal.fire('Error', 'เกิดข้อผิดพลาดในการส่งข้อมูล', 'error'); 
             } finally { 
@@ -368,7 +387,6 @@
             }
         }
 
-        // ❌ (กากบาท) ฟังก์ชันลบข้อมูล
         async function deleteRecord(rowIndex) {
             const res = await Swal.fire({ 
                 title: 'ยกเลิกการลา?', 
@@ -384,38 +402,32 @@
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteAbsence', rowIndex: rowIndex }) });
                 Swal.fire('สำเร็จ', 'ข้อมูลถูกยกเลิกแล้ว', 'success');
-                await loadAllData(true); // โหลดใหม่เพื่อให้หน้าสถานะกลับเป็นติ๊กถูก
+                await loadAllData(true); 
             } catch(e) { 
                 Swal.fire('Error', 'ไม่สามารถลบข้อมูลได้', 'error'); 
                 document.getElementById('loader').classList.add('hidden'); 
             }
         }
 
-        // ✏️ (ดินสอ) กดเพื่อเปิดกล่องแก้ไขข้อมูล
         function openEditForm(rowIndex, name, reason) {
             currentEditRowIndex = rowIndex;
             currentEditName = name;
             
-            // นำข้อมูลไปใส่ในกล่อง Edit
             document.getElementById('editNameDisplay').innerText = name;
             document.getElementById('editReason').value = reason;
             
-            // ล้างวันที่ บังคับให้จิ้มเลือกปฏิทินใหม่เพื่อความแม่นยำ
             document.getElementById('editStartDate').value = ''; document.getElementById('editStartDate').type = 'text';
             document.getElementById('editEndDate').value = ''; document.getElementById('editEndDate').type = 'text';
             
-            // โชว์กล่องฟอร์มแก้ไข และเลื่อนจอขึ้นไปด้านบน
             document.getElementById('editFormBlock').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ปิดกล่องแก้ไข
         function cancelEdit() {
             currentEditRowIndex = null;
             document.getElementById('editFormBlock').classList.add('hidden');
         }
 
-        // 💾 ฟังก์ชันกดอัปเดตข้อมูล (ส่งกลับไปทับแถวเดิม)
         async function submitEdit() {
             const btn = document.getElementById('btnEditSubmit');
             const data = { 
@@ -442,7 +454,6 @@
             }
         }
 
-        // เริ่มต้นโหลดข้อมูล
         loadAllData();
     </script>
 </body>
