@@ -25,16 +25,12 @@
         @media (min-width: 768px) { .exec-name { font-size: 15px; } }
         
         /* แก้ปัญหาช่อง Date Input ว่างเปล่าบนมือถือ */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            opacity: 1;
-            display: block;
-            cursor: pointer;
-        }
-        input[type="date"], input[type="text"].date-hack {
-            color: #1e293b !important; /* บังคับสีตัวอักษรให้เห็นชัด */
-            appearance: none;
-            -webkit-appearance: none;
-        }
+        input[type="date"]::-webkit-calendar-picker-indicator { opacity: 1; display: block; cursor: pointer; }
+        input[type="date"], input[type="text"].date-hack { color: #1e293b !important; appearance: none; -webkit-appearance: none; }
+        
+        /* สไตล์ของปุ่มเมนูย่อยในหน้าจัดการ */
+        .sub-tab-btn { transition: all 0.2s ease; border-bottom: 3px solid transparent; }
+        .sub-tab-active { color: #0284c7 !important; border-bottom-color: #0284c7 !important; background-color: #f0f9ff; }
     </style>
 </head>
 <body class="pb-12">
@@ -53,7 +49,7 @@
             <div class="flex bg-black/20 p-1 rounded-xl">
                 <button id="btn-home" onclick="showTab('home')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60 tab-active">สถานะ</button>
                 <button id="btn-calendar" onclick="showTab('calendar')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60">ปฏิทิน</button>
-                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60">จัดการ</button>
+                <button id="btn-admin" onclick="showTab('admin')" class="tab-btn px-3 py-1.5 text-[10px] md:text-xs text-white/60 bg-red-500/20 text-red-100 flex items-center gap-1">🔒 จัดการ</button>
             </div>
         </div>
     </header>
@@ -70,9 +66,7 @@
             
             <div class="executive-card overflow-hidden">
                 <table class="status-table">
-                    <thead>
-                        <tr id="tableHeader" class="bg-gray-100/50 border-b border-gray-100"></tr>
-                    </thead>
+                    <thead><tr id="tableHeader" class="bg-gray-100/50 border-b border-gray-100"></tr></thead>
                     <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
@@ -96,40 +90,67 @@
         </div>
 
         <div id="tab-admin" class="tab-content hidden px-2">
-            <div class="max-w-sm mx-auto executive-card p-6">
-                <h2 class="text-xl font-extrabold text-slate-900 mb-6 border-l-4 border-orange-500 pl-3">ลงข้อมูลใหม่</h2>
-                <div class="space-y-4">
+            <div class="max-w-md mx-auto">
+                <div class="bg-slate-900 text-white p-4 rounded-t-2xl flex justify-between items-center shadow-md relative z-10">
                     <div>
-                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">ชื่อผู้บริหาร</label>
-                        <select id="adminNameSelect" class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"></select>
+                        <h2 class="font-extrabold text-lg flex items-center gap-2">🛡️ Admin Panel</h2>
+                        <p class="text-[10px] text-slate-400">ระบบจัดการข้อมูลส่วนบุคคล</p>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">เริ่มวันที่</label>
-                            <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="startDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">ถึงวันที่</label>
-                            <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="endDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">หมายเหตุ</label>
-                        <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                    </div>
-
-                    <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl active:scale-95 transition-all text-sm uppercase mt-4 shadow-lg hover:bg-slate-800">Submit Record</button>
-                    <button id="cancelEditBtn" onclick="cancelEdit()" class="w-full bg-slate-100 text-slate-500 font-black py-3 rounded-xl active:scale-95 transition-all text-xs uppercase hidden mt-2">ยกเลิกการแก้ไข</button>
+                    <span class="text-[9px] bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-1 rounded-md font-bold">🟢 SECURE</span>
+                </div>
+                
+                <div class="bg-white border-x border-slate-200 flex shadow-sm relative z-0">
+                    <button onclick="showAdminSub('add')" id="subbtn-add" class="sub-tab-btn sub-tab-active flex-1 py-3 text-xs font-bold text-slate-600 flex items-center justify-center gap-1.5">
+                        <span class="text-base">➕</span> เพิ่มข้อมูล
+                    </button>
+                    <button onclick="showAdminSub('manage')" id="subbtn-manage" class="sub-tab-btn flex-1 py-3 text-xs font-bold text-slate-600 flex items-center justify-center gap-1.5 border-l border-slate-100">
+                        <span class="text-base">⚙️</span> ประวัติ / แก้ไข / ลบ
+                    </button>
                 </div>
 
-                <div class="mt-8 border-t border-slate-100 pt-6">
-                    <h3 class="text-sm font-extrabold text-slate-900 mb-4">ประวัติการลา (ล่าสุด)</h3>
-                    <div id="adminRecordList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <div class="bg-white p-5 rounded-b-2xl shadow-lg border border-t-0 border-slate-200">
+                    
+                    <div id="admin-view-add" class="space-y-4 block">
+                        <h3 id="adminFormTitle" class="text-sm font-extrabold text-slate-800 border-l-4 border-blue-500 pl-2 mb-4">ฟอร์มบันทึกข้อมูลใหม่</h3>
+                        
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">ชื่อผู้บริหาร</label>
+                            <select id="adminNameSelect" class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"></select>
                         </div>
-                </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-500 mb-1 block">เริ่มวันที่</label>
+                                <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="startDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-500 mb-1 block">ถึงวันที่</label>
+                                <input type="text" placeholder="วว/ดด/ปปปป" onfocus="(this.type='date')" onblur="(this.value == '' ? this.type='text' : this.type='date')" id="endDate" class="date-hack w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1 block">หมายเหตุ</label>
+                            <input type="text" id="reason" placeholder="เช่น ไปราชการ กทม." class="w-full p-3.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
 
+                        <div class="pt-2">
+                            <button id="submitBtn" onclick="submitAbsence()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl active:scale-95 transition-all text-sm uppercase shadow-md hover:bg-blue-700">SUBMIT RECORD</button>
+                            <button id="cancelEditBtn" onclick="cancelEdit()" class="w-full bg-slate-100 text-slate-500 font-black py-3 rounded-xl active:scale-95 transition-all text-xs uppercase hidden mt-2 hover:bg-slate-200">ยกเลิกการแก้ไข</button>
+                        </div>
+                    </div>
+
+                    <div id="admin-view-manage" class="hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-extrabold text-slate-800 border-l-4 border-orange-500 pl-2">ประวัติการลาในระบบ</h3>
+                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold" id="recordCount">0 รายการ</span>
+                        </div>
+                        
+                        <div id="adminRecordList" class="space-y-3 max-h-[400px] overflow-y-auto pr-1 pb-4">
+                            </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </main>
@@ -145,60 +166,80 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbwfqxOQk28891H2JnmnNetSgUmTLUyAD6cjj05OSXocSYWZeIuoT5S1f8_tqrot-gBAPg/exec';
         
         let rawStatus = []; let rawSchedule = []; let viewDate = new Date(2026, 2, 30);
-        let editRowId = null; // ตัวแปรสำหรับเก็บว่ากำลังแก้ไขบรรทัดไหน
+        let isAdminAuthed = false; 
+        let editRowId = null; 
 
-        // 🚀 ระบบ Cache อัจฉริยะ (โหลดหน้าไวขึ้น 10 เท่า)
         async function loadAllData(force = false) {
             const cachedStatus = localStorage.getItem('sciStatus');
             const cachedSchedule = localStorage.getItem('sciSchedule');
             
-            // ถ้ามีข้อมูลใน Cache ให้เอามาแสดงก่อนเลยทันทีแบบไม่ตัองรอโหลด!
             if (cachedStatus && cachedSchedule && !force) {
-                rawStatus = JSON.parse(cachedStatus);
-                rawSchedule = JSON.parse(cachedSchedule);
+                rawStatus = JSON.parse(cachedStatus); rawSchedule = JSON.parse(cachedSchedule);
                 renderHome(); renderCalendar(); populateAdminSelect(); renderAdminList();
-            } else {
-                document.getElementById('loader').classList.remove('hidden');
-            }
+            } else { document.getElementById('loader').classList.remove('hidden'); }
 
             try {
-                // แอบดึงข้อมูลใหม่เบื้องหลัง
                 const [res1, res2] = await Promise.all([
                     fetch(`${API_URL}?sheet=Status`, { redirect: 'follow' }),
                     fetch(`${API_URL}?sheet=Schedule`, { redirect: 'follow' })
                 ]);
                 rawStatus = await res1.json(); rawSchedule = await res2.json();
                 
-                // บันทึกลง Cache ไว้ใช้ครั้งหน้า
                 localStorage.setItem('sciStatus', JSON.stringify(rawStatus));
                 localStorage.setItem('sciSchedule', JSON.stringify(rawSchedule));
                 
-                // รีเฟรชหน้าจอเงียบๆ ด้วยข้อมูลใหม่ล่าสุด
                 renderHome(); renderCalendar(); populateAdminSelect(); renderAdminList();
             } catch (e) { 
                 if (!cachedStatus) Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error'); 
-            } finally { 
-                document.getElementById('loader').classList.add('hidden'); 
+            } finally { document.getElementById('loader').classList.add('hidden'); }
+        }
+
+        function forceRefresh() { loadAllData(true); }
+
+        // 🔐 ระบบพาสเวิร์ด
+        async function showTab(id) {
+            if (id === 'admin' && !isAdminAuthed) {
+                const { value: password } = await Swal.fire({
+                    title: '🔒 เข้าสู่ระบบแอดมิน',
+                    input: 'password',
+                    inputPlaceholder: 'กรอกรหัสผ่าน 4 หลัก',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#0f172a'
+                });
+                
+                if (password === '1234') { // รหัสผ่านคือ 1234
+                    isAdminAuthed = true;
+                    Swal.fire({ title: 'ยืนยันตัวตนสำเร็จ', text: 'ยินดีต้อนรับเข้าสู่ระบบจัดการ', icon: 'success', timer: 1200, showConfirmButton: false });
+                } else {
+                    if (password) Swal.fire('รหัสผ่านผิด!', 'คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'error');
+                    return; 
+                }
             }
-        }
 
-        // กดปุ่มรีเฟรชจะบังคับล้าง Cache และดึงใหม่
-        function forceRefresh() {
-            loadAllData(true);
-        }
-
-        function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
             document.getElementById(`tab-${id}`).classList.remove('hidden');
             document.getElementById(`btn-${id}`).classList.add('tab-active');
         }
 
-        function normalizeDate(d) {
-            if(!d) return null;
-            const date = new Date(d); date.setHours(0,0,0,0);
-            return date.getTime();
+        // 🔄 ระบบสลับเมนูย่อยในหน้า Admin
+        function showAdminSub(mode) {
+            // ล้างสถานะปุ่ม
+            document.getElementById('subbtn-add').classList.remove('sub-tab-active');
+            document.getElementById('subbtn-manage').classList.remove('sub-tab-active');
+            // ซ่อนเนื้อหาทั้งหมด
+            document.getElementById('admin-view-add').classList.add('hidden');
+            document.getElementById('admin-view-manage').classList.add('hidden');
+
+            // แสดงเฉพาะอันที่เลือก
+            document.getElementById(`subbtn-${mode}`).classList.add('sub-tab-active');
+            document.getElementById(`admin-view-${mode}`).classList.remove('hidden');
         }
+
+        // ฟังก์ชันทั่วไป
+        function normalizeDate(d) { if(!d) return null; const date = new Date(d); date.setHours(0,0,0,0); return date.getTime(); }
 
         function showDetail(name, reason, start, end) {
             const startDate = new Date(start).toLocaleDateString('th-TH', { day:'numeric', month:'short' });
@@ -211,34 +252,19 @@
         }
 
         function renderHome() {
-            const header = document.getElementById('tableHeader');
-            const body = document.getElementById('tableBody');
-            const dates = [];
-            let startLimit = new Date(2026, 2, 30);
-            let today = new Date();
-            let temp = (today > startLimit) ? today : new Date(startLimit);
-
-            while(dates.length < 5) {
-                if(temp.getDay() !== 0 && temp.getDay() !== 6) dates.push(new Date(temp));
-                temp.setDate(temp.getDate() + 1);
-            }
+            const header = document.getElementById('tableHeader'); const body = document.getElementById('tableBody');
+            const dates = []; let startLimit = new Date(2026, 2, 30); let today = new Date(); let temp = (today > startLimit) ? today : new Date(startLimit);
+            while(dates.length < 5) { if(temp.getDay() !== 0 && temp.getDay() !== 6) dates.push(new Date(temp)); temp.setDate(temp.getDate() + 1); }
 
             header.innerHTML = '<th class="name-cell font-extrabold text-slate-900 text-sm md:text-base">คณะผู้บริหาร</th>';
             dates.forEach((d, idx) => {
                 const isToday = normalizeDate(d) === normalizeDate(new Date());
-                header.innerHTML += `
-                    <th class="date-cell ${isToday ? 'today-banner' : 'text-slate-900'}">
-                        <div class="text-[11px] md:text-sm font-black uppercase">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
-                        <div class="text-sm md:text-base font-black">${d.getDate()}</div>
-                    </th>`;
+                header.innerHTML += `<th class="date-cell ${isToday ? 'today-banner' : 'text-slate-900'}"><div class="text-[11px] md:text-sm font-black uppercase">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div><div class="text-sm md:text-base font-black">${d.getDate()}</div></th>`;
             });
 
             body.innerHTML = '';
             rawStatus.forEach(person => {
-                let row = `<tr class="bg-white"><td class="name-cell border-b border-gray-50">
-                    <div class="exec-name text-slate-900">${person.Name}</div>
-                    <div class="text-[8px] md:text-[9px] font-black text-blue-500 uppercase tracking-tighter mt-0.5">${person.Role}</div></td>`;
-                
+                let row = `<tr class="bg-white"><td class="name-cell border-b border-gray-50"><div class="exec-name text-slate-900">${person.Name}</div><div class="text-[8px] md:text-[9px] font-black text-blue-500 uppercase tracking-tighter mt-0.5">${person.Role}</div></td>`;
                 dates.forEach((date, idx) => {
                     const target = normalizeDate(date);
                     const isToday = target === normalizeDate(new Date());
@@ -246,11 +272,8 @@
                     const isDirAbsent = rawSchedule.some(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
 
                     let content = '<div class="vivid-tick">✅</div>';
-                    if(schedule) {
-                        content = `<div onclick="showDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="vivid-cross">❌</div>`;
-                    } else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) {
-                        content = `<div class="flex flex-col items-center"><span class="text-base md:text-xl">👑</span><span class="text-[6px] md:text-[7px] font-black text-blue-600 leading-none mt-1">รักษาราชการแทน ผอ.</span></div>`;
-                    }
+                    if(schedule) { content = `<div onclick="showDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="vivid-cross">❌</div>`; } 
+                    else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) { content = `<div class="flex flex-col items-center"><span class="text-base md:text-xl">👑</span><span class="text-[6px] md:text-[7px] font-black text-blue-600 leading-none mt-1">รักษาราชการแทน ผอ.</span></div>`; }
                     row += `<td class="date-cell border-b border-gray-50 ${isToday ? 'today-column-bg' : ''}">${content}</td>`;
                 });
                 body.innerHTML += row + '</tr>';
@@ -258,68 +281,70 @@
         }
 
         function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const monthYear = document.getElementById('calMonthYear');
-            grid.innerHTML = '';
+            const grid = document.getElementById('calendarGrid'); const monthYear = document.getElementById('calMonthYear'); grid.innerHTML = '';
             const y = viewDate.getFullYear(); const m = viewDate.getMonth();
             monthYear.innerText = new Intl.DateTimeFormat('th-TH', {month:'long', year:'numeric'}).format(viewDate);
             ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-black text-gray-400 text-[9px] py-1 uppercase">${d}</div>`);
             const first = new Date(y, m, 1).getDay(); const days = new Date(y, m + 1, 0).getDate();
             for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=days; d++) {
-                const current = normalizeDate(new Date(y, m, d));
-                const isToday = current === normalizeDate(new Date());
-                const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
+                const current = normalizeDate(new Date(y, m, d)); const isToday = current === normalizeDate(new Date()); const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
                 let peopleList = isStarted ? rawStatus.map(p => {
                     const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
-                    return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold' : 'font-bold text-gray-400'}">
-                        <span>${p.Name.split(' ')[0]}</span><span>${sched ? '❌' : '✅'}</span></div>`;
+                    return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold' : 'font-bold text-gray-400'}"><span>${p.Name.split(' ')[0]}</span><span>${sched ? '❌' : '✅'}</span></div>`;
                 }).join('') : '';
-                grid.innerHTML += `<div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday ? 'ring-2 ring-blue-500 shadow-sm' : ''}">
-                    <div class="text-[9px] font-black mb-1 ${isToday ? 'text-blue-600' : 'text-slate-400'}">${d}</div><div class="flex-1">${peopleList}</div></div>`;
+                grid.innerHTML += `<div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday ? 'ring-2 ring-blue-500 shadow-sm' : ''}"><div class="text-[9px] font-black mb-1 ${isToday ? 'text-blue-600' : 'text-slate-400'}">${d}</div><div class="flex-1">${peopleList}</div></div>`;
             }
         }
 
         function changeMonth(s) { viewDate.setMonth(viewDate.getMonth() + s); renderCalendar(); }
         function populateAdminSelect() { document.getElementById('adminNameSelect').innerHTML = rawStatus.map(p => `<option value="${p.Name}">${p.Name}</option>`).join(''); }
 
-        // 📌 ฟังก์ชันดึงประวัติมาสร้างเป็น List 
+        // 📌 สร้างรายการลบ/แก้ไข ในแถบ 'จัดการข้อมูล'
         function renderAdminList() {
             const list = document.getElementById('adminRecordList');
+            const countLabel = document.getElementById('recordCount');
             if(!list) return;
+            
             list.innerHTML = '';
-            const sortedSchedule = [...rawSchedule].reverse(); // เอาล่าสุดขึ้นก่อน
+            const validSchedules = rawSchedule.filter(s => s.Name && s._rowIndex); // คัดเฉพาะอันที่มีข้อมูล
+            countLabel.innerText = `${validSchedules.length} รายการ`;
+            
+            const sortedSchedule = [...validSchedules].reverse(); // เอาล่าสุดขึ้นก่อน
             sortedSchedule.forEach(s => {
-                if(!s.Name || !s._rowIndex) return; // ข้ามถ้าไม่มีข้อมูลบรรทัด
-                const sd = new Date(s.StartDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'});
-                const ed = new Date(s.EndDate).toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+                const sd = new Date(s.StartDate).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
+                const ed = new Date(s.EndDate).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
                 
                 list.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div>
-                            <p class="text-[11px] font-black text-slate-900">${s.Name.split(' ')[0]}</p>
-                            <p class="text-[9px] text-slate-500 mt-0.5">${sd} - ${ed}</p>
-                            <p class="text-[9px] text-orange-500 font-bold">${s.Reason}</p>
+                    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="w-2/3 pr-2">
+                            <p class="text-xs font-black text-slate-900 truncate">${s.Name}</p>
+                            <p class="text-[10px] text-slate-500 mt-1"><span class="font-bold">วันที่:</span> ${sd} - ${ed}</p>
+                            <p class="text-[10px] text-orange-600 font-bold mt-0.5 truncate"><span class="text-slate-400">เหตุผล:</span> ${s.Reason}</p>
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <button onclick="prepareEdit(${s._rowIndex}, '${s.Name}', '${s.Reason}')" class="text-[9px] bg-slate-200 text-slate-700 px-3 py-1 rounded font-bold">แก้ไข</button>
-                            <button onclick="deleteRecord(${s._rowIndex})" class="text-[9px] bg-red-100 text-red-600 px-3 py-1 rounded font-bold">ลบ</button>
+                        <div class="flex flex-col gap-2 w-1/3">
+                            <button onclick="prepareEdit(${s._rowIndex}, '${s.Name}', '${s.Reason}')" class="text-[10px] w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-1.5 rounded-lg font-bold transition">✏️ แก้ไข</button>
+                            <button onclick="deleteRecord(${s._rowIndex})" class="text-[10px] w-full bg-red-100 hover:bg-red-200 text-red-600 py-1.5 rounded-lg font-bold transition">🗑️ ลบ</button>
                         </div>
                     </div>
                 `;
             });
+            
+            if(validSchedules.length === 0) {
+                list.innerHTML = '<p class="text-xs text-center text-slate-400 py-6">ไม่มีประวัติการลาในระบบ</p>';
+            }
         }
 
         // 🗑️ ลบข้อมูล
         async function deleteRecord(rowIndex) {
-            const res = await Swal.fire({ title: 'ยืนยันการลบ?', text: "ข้อมูลนี้จะถูกลบออกจากระบบ", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ลบเลย!' });
+            const res = await Swal.fire({ title: 'ยืนยันการลบ?', text: "ต้องการลบประวัตินี้ใช่หรือไม่?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ลบข้อมูล' });
             if(!res.isConfirmed) return;
             
             document.getElementById('loader').classList.remove('hidden');
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteAbsence', rowIndex: rowIndex }) });
                 Swal.fire('สำเร็จ', 'ลบข้อมูลเรียบร้อย', 'success');
-                await loadAllData(true); // บังคับรีเฟรชข้อมูลใหม่
+                await loadAllData(true); 
             } catch(e) { 
                 Swal.fire('Error', 'ไม่สามารถลบข้อมูลได้', 'error'); 
                 document.getElementById('loader').classList.add('hidden'); 
@@ -332,55 +357,61 @@
             document.getElementById('adminNameSelect').value = name;
             document.getElementById('reason').value = reason;
             
-            // ล้างวันที่เดิมทิ้ง เพื่อบังคับให้ผู้ใช้กดเลือกปฏิทินใหม่ ป้องกันบั๊กวันที่
-            document.getElementById('startDate').value = '';
-            document.getElementById('startDate').type = 'text';
-            document.getElementById('endDate').value = '';
-            document.getElementById('endDate').type = 'text';
+            // ล้างวันที่เดิม บังคับให้จิ้มเลือกปฏิทินใหม่
+            document.getElementById('startDate').value = ''; document.getElementById('startDate').type = 'text';
+            document.getElementById('endDate').value = ''; document.getElementById('endDate').type = 'text';
+            
+            // เปลี่ยนหน้าตาฟอร์มให้เป็นโหมดแก้ไข
+            document.getElementById('adminFormTitle').innerText = 'แก้ไขข้อมูลการลา (เลือกวันที่ใหม่)';
+            document.getElementById('adminFormTitle').classList.replace('border-blue-500', 'border-orange-500');
             
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = 'UPDATE RECORD (บันทึกการแก้ไข)';
-            btn.classList.replace('bg-slate-900', 'bg-blue-600');
+            btn.classList.replace('bg-blue-600', 'bg-orange-500');
+            btn.classList.replace('hover:bg-blue-700', 'hover:bg-orange-600');
             document.getElementById('cancelEditBtn').classList.remove('hidden');
             
-            window.scrollTo({ top: 0, behavior: 'smooth' }); // เลื่อนจอขึ้นไปข้างบนสุด
+            // สลับกลับไปที่หน้าต่าง Add/Edit อัตโนมัติ
+            showAdminSub('add');
         }
 
         // ❌ ยกเลิกการแก้ไข
         function cancelEdit() {
             editRowId = null;
-            document.getElementById('startDate').value = ''; 
-            document.getElementById('endDate').value = ''; 
-            document.getElementById('reason').value = '';
+            document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; document.getElementById('reason').value = '';
+            
+            document.getElementById('adminFormTitle').innerText = 'ฟอร์มบันทึกข้อมูลใหม่';
+            document.getElementById('adminFormTitle').classList.replace('border-orange-500', 'border-blue-500');
             
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = 'SUBMIT RECORD';
-            btn.classList.replace('bg-blue-600', 'bg-slate-900');
+            btn.classList.replace('bg-orange-500', 'bg-blue-600');
+            btn.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
             document.getElementById('cancelEditBtn').classList.add('hidden');
         }
         
-        // 💾 ฟังก์ชันบันทึก (สำหรับ เพิ่มใหม่ และ แก้ไข)
+        // 💾 ฟังก์ชันบันทึก
         async function submitAbsence() {
             const btn = document.getElementById('submitBtn');
             const actionType = editRowId ? 'editAbsence' : 'addAbsence';
             
             const data = { 
                 action: actionType, 
-                rowIndex: editRowId, // ส่งไปด้วยถ้ากำลังแก้ไข
+                rowIndex: editRowId, 
                 name: document.getElementById('adminNameSelect').value, 
                 startDate: document.getElementById('startDate').value, 
                 endDate: document.getElementById('endDate').value, 
                 reason: document.getElementById('reason').value 
             };
             
-            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('Error', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
+            if(!data.startDate || !data.endDate || !data.reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกวันที่และเหตุผลให้ครบถ้วน', 'warning');
             
-            btn.disabled = true; btn.innerHTML = 'กำลังบันทึกข้อมูล...';
+            btn.disabled = true; btn.innerHTML = 'กำลังประมวลผล...';
             try { 
                 await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); 
                 Swal.fire({ title: 'บันทึกสำเร็จ', icon: 'success', confirmButtonColor: '#0f172a' }); 
-                cancelEdit(); // เคลียร์ฟอร์ม
-                await loadAllData(true); // บังคับดึงข้อมูลใหม่
+                cancelEdit(); 
+                await loadAllData(true); 
                 showTab('home'); 
             } catch (e) { 
                 Swal.fire('Error', 'ไม่สามารถบันทึกข้อมูลได้', 'error'); 
