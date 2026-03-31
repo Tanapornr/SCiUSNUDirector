@@ -69,6 +69,7 @@
                 <div class="flex items-center gap-1"><span class="vivid-tick text-base">✅</span> อยู่ปฏิบัติงาน</div>
                 <div class="flex items-center gap-1"><span class="vivid-cross text-base">❌</span> ลา/ราชการ (คลิก)</div>
                 <div class="flex items-center gap-1"><span>👑</span> รักษาราชการแทน</div>
+                <div class="flex items-center gap-1 text-red-500"><span class="text-base">🌴</span> วันหยุดราชการ</div>
             </div>
         </div>
 
@@ -163,9 +164,10 @@
     </main>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycby0qXA_qYEXNc4OAgt3fNvq2Cz7xiEM2USFWo9yLKLXvdEXF2UAdLg1z4sewHrd9vebZw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxU_RZnKBxTCK2vZoj827zXJLD9v_MQAMqy6KxTdCpNHeceLi_yC_B0ebFxtcFKSNv7/exec';
         
-        let rawStatus = []; let rawSchedule = []; let viewDate = new Date(2026, 2, 30);
+        let rawStatus = []; let rawSchedule = []; let rawHolidays = [];
+        let viewDate = new Date(); 
         let isAdminAuthed = false; 
         let currentEditRowIndex = null;
         let currentEditName = "";
@@ -181,27 +183,30 @@
             for (let key in execImages) {
                 if (name.includes(key)) return execImages[key];
             }
-            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0f172a&color=fff`; // รูปสำรองถ้าไม่มีชื่อ
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0f172a&color=fff`; 
         }
 
         async function loadAllData(force = false, silent = false) {
             const cachedStatus = localStorage.getItem('sciStatus');
             const cachedSchedule = localStorage.getItem('sciSchedule');
+            const cachedHolidays = localStorage.getItem('sciHolidays');
             
-            if (cachedStatus && cachedSchedule && !force) {
-                rawStatus = JSON.parse(cachedStatus); rawSchedule = JSON.parse(cachedSchedule);
+            if (cachedStatus && cachedSchedule && cachedHolidays && !force) {
+                rawStatus = JSON.parse(cachedStatus); rawSchedule = JSON.parse(cachedSchedule); rawHolidays = JSON.parse(cachedHolidays);
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } 
             
             try {
-                const [res1, res2] = await Promise.all([
+                const [res1, res2, res3] = await Promise.all([
                     fetch(`${API_URL}?sheet=Status`, { redirect: 'follow' }),
-                    fetch(`${API_URL}?sheet=Schedule`, { redirect: 'follow' })
+                    fetch(`${API_URL}?sheet=Schedule`, { redirect: 'follow' }),
+                    fetch(`${API_URL}?action=getHolidays`, { redirect: 'follow' }) // 📌 ดึงข้อมูลวันหยุด
                 ]);
-                rawStatus = await res1.json(); rawSchedule = await res2.json();
+                rawStatus = await res1.json(); rawSchedule = await res2.json(); rawHolidays = await res3.json();
                 
                 localStorage.setItem('sciStatus', JSON.stringify(rawStatus));
                 localStorage.setItem('sciSchedule', JSON.stringify(rawSchedule));
+                localStorage.setItem('sciHolidays', JSON.stringify(rawHolidays));
                 
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } catch (e) { 
@@ -266,15 +271,21 @@
             header.innerHTML = '<th class="name-cell font-extrabold text-slate-900 text-sm md:text-base">คณะผู้บริหาร</th>';
             dates.forEach((d, idx) => {
                 const isToday = normalizeDate(d) === normalizeDate(new Date());
-                header.innerHTML += `<th class="date-cell ${isToday ? 'today-banner' : 'text-slate-900'}"><div class="text-[11px] md:text-sm font-black uppercase">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div><div class="text-sm md:text-base font-black">${d.getDate()}</div></th>`;
+                const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const holiday = rawHolidays.find(h => h.dateString === dStr); 
+                
+                header.innerHTML += `
+                    <th class="date-cell ${isToday && !holiday ? 'today-banner' : (holiday ? 'bg-red-50' : 'text-slate-900')}">
+                        <div class="text-[11px] md:text-sm font-black uppercase ${holiday ? 'text-red-500' : ''}">${d.toLocaleDateString('th-TH', {weekday:'short'})}</div>
+                        <div class="text-sm md:text-base font-black ${holiday ? 'text-red-500' : ''}">${d.getDate()}</div>
+                        ${holiday ? `<div class="text-[7px] md:text-[8px] text-red-500 font-bold mt-1 leading-tight px-1 truncate" title="${holiday.name}">${holiday.name.replace(/วันหยุดชดเชย/g, "ชดเชย").replace(/วัน/g, "")}</div>` : ''}
+                    </th>`;
             });
 
             body.innerHTML = '';
             rawStatus.forEach(person => {
-                // 🟢 ดึงรูปภาพตามชื่อ
                 let imgUrl = getProfileImage(person.Name);
                 
-                // 🟢 สร้างโครงสร้างแบบมีรูปภาพ
                 let row = `<tr class="bg-white"><td class="name-cell border-b border-gray-50">
                     <div class="flex items-center gap-2 md:gap-3">
                         <img src="${imgUrl}" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-slate-200 shadow-sm shrink-0 bg-slate-100">
@@ -286,15 +297,25 @@
                 </td>`;
                 
                 dates.forEach((date, idx) => {
+                    const dStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    const holiday = rawHolidays.find(h => h.dateString === dStr);
+
                     const target = normalizeDate(date);
                     const isToday = target === normalizeDate(new Date());
                     const schedule = rawSchedule.find(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.trim() === person.Name.trim());
                     const isDirAbsent = rawSchedule.some(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
 
                     let content = '<div class="vivid-tick">✅</div>';
-                    if(schedule) { content = `<div onclick="showDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="vivid-cross">❌</div>`; } 
-                    else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) { content = `<div class="flex flex-col items-center"><span class="text-base md:text-xl">👑</span><span class="text-[6px] md:text-[7px] font-black text-blue-600 leading-none mt-1">รักษาราชการแทน</span></div>`; }
-                    row += `<td class="date-cell border-b border-gray-50 ${isToday ? 'today-column-bg' : ''}">${content}</td>`;
+                    
+                    if(holiday) {
+                        content = `<div class="text-[9px] md:text-[11px] font-bold text-red-500 flex flex-col items-center"><span class="text-base leading-none mb-0.5">🌴</span>หยุด</div>`;
+                    } else if(schedule) { 
+                        content = `<div onclick="showDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="vivid-cross">❌</div>`; 
+                    } else if(person.Name.includes('ทนงศักดิ์') && isDirAbsent) { 
+                        content = `<div class="flex flex-col items-center"><span class="text-base md:text-xl leading-none">👑</span><span class="text-[6px] md:text-[7px] font-black text-blue-600 leading-none mt-1">รักษาการ</span></div>`; 
+                    }
+                    
+                    row += `<td class="date-cell border-b border-gray-50 ${isToday && !holiday ? 'today-column-bg' : (holiday ? 'bg-red-50' : '')}">${content}</td>`;
                 });
                 body.innerHTML += row + '</tr>';
             });
@@ -308,12 +329,25 @@
             const first = new Date(y, m, 1).getDay(); const days = new Date(y, m + 1, 0).getDate();
             for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=days; d++) {
-                const current = normalizeDate(new Date(y, m, d)); const isToday = current === normalizeDate(new Date()); const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
+                const current = normalizeDate(new Date(y, m, d)); 
+                const isToday = current === normalizeDate(new Date()); 
+                const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
+                
+                const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const holiday = rawHolidays.find(h => h.dateString === dStr);
+
                 let peopleList = isStarted ? rawStatus.map(p => {
                     const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
+                    if(holiday) return ''; 
                     return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold' : 'font-bold text-gray-400'}"><span>${p.Name.split(' ')[0]}</span><span>${sched ? '❌' : '✅'}</span></div>`;
                 }).join('') : '';
-                grid.innerHTML += `<div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday ? 'ring-2 ring-blue-500 shadow-sm' : ''}"><div class="text-[9px] font-black mb-1 ${isToday ? 'text-blue-600' : 'text-slate-400'}">${d}</div><div class="flex-1">${peopleList}</div></div>`;
+                
+                grid.innerHTML += `<div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday ? 'ring-2 ring-blue-500 shadow-sm' : (holiday ? 'bg-red-50 border-red-100' : '')}">
+                    <div class="text-[9px] font-black mb-1 ${isToday ? 'text-blue-600' : (holiday ? 'text-red-500' : 'text-slate-400')} leading-tight">
+                        ${d} ${holiday ? `<span class="font-normal text-[7px] block truncate text-red-400 mt-0.5">${holiday.name}</span>` : ''}
+                    </div>
+                    <div class="flex-1">${peopleList}</div>
+                </div>`;
             }
         }
 
