@@ -113,7 +113,6 @@
 
         <div id="tab-edit" class="tab-content hidden px-1">
             <div class="max-w-lg mx-auto">
-                
                 <div id="editFormBlock" class="hidden bg-white p-5 rounded-2xl shadow-lg border-t-4 border-orange-500 mb-6">
                     <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1 mb-4">✏️ กำลังแก้ไขข้อมูลของ: <span id="editNameDisplay" class="text-orange-600"></span></h3>
                     <div class="grid grid-cols-2 gap-3 mb-3">
@@ -157,22 +156,27 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
 
     </main>
 
+    <div id="loader" class="fixed inset-0 bg-white/70 backdrop-blur-md z-[100] flex items-center justify-center hidden">
+        <div class="flex flex-col items-center">
+            <div class="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 text-xs font-bold text-slate-600">กำลังซิงค์ข้อมูล...</p>
+        </div>
+    </div>
+
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxU_RZnKBxTCK2vZoj827zXJLD9v_MQAMqy6KxTdCpNHeceLi_yC_B0ebFxtcFKSNv7/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx4X0umYk-8ngdaPI8vPMayVohenjEwFU1GHD4O5YTjXFab8HM9oWK_5CIQvIwRCEFYXw/exec';
         
         let rawStatus = []; let rawSchedule = []; let rawHolidays = [];
-        let viewDate = new Date(2026, 2, 30); // หรือเปลี่ยนเป็น new Date() ถ้าต้องการให้เริ่มเดือนปัจจุบัน
+        let viewDate = new Date(2026, 2, 30); 
         let isAdminAuthed = false; 
         let currentEditRowIndex = null;
         let currentEditName = "";
 
-        // 📌 ระบบจับคู่รูปภาพผู้บริหาร
         const execImages = {
             "ฑิราณี": "https://img1.pic.in.th/images/thiranee-1.png",
             "ทนงศักดิ์": "https://img1.pic.in.th/images/thanongsak-1.png",
@@ -180,9 +184,7 @@
         };
 
         function getProfileImage(name) {
-            for (let key in execImages) {
-                if (name.includes(key)) return execImages[key];
-            }
+            for (let key in execImages) { if (name.includes(key)) return execImages[key]; }
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0f172a&color=fff`; 
         }
 
@@ -191,22 +193,36 @@
             const cachedSchedule = localStorage.getItem('sciSchedule');
             const cachedHolidays = localStorage.getItem('sciHolidays');
             
-            if (cachedStatus && cachedSchedule && cachedHolidays && !force) {
+            if (cachedStatus && cachedSchedule && !force) {
                 rawStatus = JSON.parse(cachedStatus); 
                 rawSchedule = JSON.parse(cachedSchedule); 
-                rawHolidays = JSON.parse(cachedHolidays);
+                rawHolidays = cachedHolidays ? JSON.parse(cachedHolidays) : [];
+                
+                // 🟢 เพิ่มระบบป้องกัน (Crash Protection) เผื่อข้อมูลใน Cache ไม่ใช่ Array
+                if(!Array.isArray(rawStatus)) rawStatus = [];
+                if(!Array.isArray(rawSchedule)) rawSchedule = [];
+                if(!Array.isArray(rawHolidays)) rawHolidays = [];
+
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } 
+            
+            if (!silent && (!cachedStatus || force)) { 
+                document.getElementById('loader').classList.remove('hidden'); 
+            }
             
             try {
                 const [res1, res2, res3] = await Promise.all([
                     fetch(`${API_URL}?sheet=Status`, { redirect: 'follow' }),
                     fetch(`${API_URL}?sheet=Schedule`, { redirect: 'follow' }),
-                    fetch(`${API_URL}?action=getHolidays`, { redirect: 'follow' }) // ดึงวันหยุด
+                    fetch(`${API_URL}?action=getHolidays`, { redirect: 'follow' })
                 ]);
-                rawStatus = await res1.json(); 
-                rawSchedule = await res2.json(); 
-                rawHolidays = await res3.json();
+                
+                let d1 = await res1.json(); let d2 = await res2.json(); let d3 = await res3.json();
+                
+                // 🟢 ป้องกันเว็บพัง ถ้า Google Apps Script ส่ง Error กลับมาแทน Array
+                rawStatus = Array.isArray(d1) ? d1 : [];
+                rawSchedule = Array.isArray(d2) ? d2 : [];
+                rawHolidays = Array.isArray(d3) ? d3 : [];
                 
                 localStorage.setItem('sciStatus', JSON.stringify(rawStatus));
                 localStorage.setItem('sciSchedule', JSON.stringify(rawSchedule));
@@ -214,7 +230,9 @@
                 
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } catch (e) { 
-                console.log("Background sync failed");
+                console.log("Background sync failed", e);
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
             }
         }
 
@@ -249,8 +267,7 @@
         }
 
         function logoutAdmin() {
-            isAdminAuthed = false;
-            cancelEdit();
+            isAdminAuthed = false; cancelEdit();
             Swal.fire({ title: 'ออกจากระบบเรียบร้อย', icon: 'success', timer: 1000, showConfirmButton: false });
             showTab('home'); 
         }
@@ -276,7 +293,7 @@
             dates.forEach((d, idx) => {
                 const isToday = normalizeDate(d) === normalizeDate(new Date());
                 const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                const holiday = rawHolidays.find(h => h.dateString === dStr); // ตรวจสอบวันหยุด
+                const holiday = rawHolidays.find(h => h.dateString === dStr); 
                 
                 header.innerHTML += `
                     <th class="date-cell ${isToday && !holiday ? 'today-banner' : (holiday ? 'bg-red-50' : 'text-slate-900')}">
@@ -287,6 +304,8 @@
             });
 
             body.innerHTML = '';
+            if (rawStatus.length === 0) return; // ถ้าข้อมูลยังไม่มา ไม่ต้องวนลูป
+
             rawStatus.forEach(person => {
                 let imgUrl = getProfileImage(person.Name);
                 
@@ -340,7 +359,7 @@
 
                 let peopleList = isStarted ? rawStatus.map(p => {
                     const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
-                    if(holiday) return ''; // ถ้าเป็นวันหยุด ไม่ต้องโชว์สถานะคนในปฏิทินรวม
+                    if(holiday) return ''; 
                     return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold' : 'font-bold text-gray-400'}"><span>${p.Name.split(' ')[0]}</span><span>${sched ? '❌' : '✅'}</span></div>`;
                 }).join('') : '';
                 
@@ -359,8 +378,7 @@
 
         function renderEditTable() {
             const tbody = document.getElementById('editTableBody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
+            if(!tbody) return; tbody.innerHTML = '';
             
             const validSchedules = rawSchedule.filter(s => s.Name && s._rowIndex);
             const sortedSchedule = [...validSchedules].reverse(); 
