@@ -167,7 +167,7 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbxU_RZnKBxTCK2vZoj827zXJLD9v_MQAMqy6KxTdCpNHeceLi_yC_B0ebFxtcFKSNv7/exec';
         
         let rawStatus = []; let rawSchedule = []; let rawHolidays = [];
-        let viewDate = new Date(); 
+        let viewDate = new Date(2026, 2, 30); // หรือเปลี่ยนเป็น new Date() ถ้าต้องการให้เริ่มเดือนปัจจุบัน
         let isAdminAuthed = false; 
         let currentEditRowIndex = null;
         let currentEditName = "";
@@ -192,7 +192,9 @@
             const cachedHolidays = localStorage.getItem('sciHolidays');
             
             if (cachedStatus && cachedSchedule && cachedHolidays && !force) {
-                rawStatus = JSON.parse(cachedStatus); rawSchedule = JSON.parse(cachedSchedule); rawHolidays = JSON.parse(cachedHolidays);
+                rawStatus = JSON.parse(cachedStatus); 
+                rawSchedule = JSON.parse(cachedSchedule); 
+                rawHolidays = JSON.parse(cachedHolidays);
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } 
             
@@ -200,9 +202,11 @@
                 const [res1, res2, res3] = await Promise.all([
                     fetch(`${API_URL}?sheet=Status`, { redirect: 'follow' }),
                     fetch(`${API_URL}?sheet=Schedule`, { redirect: 'follow' }),
-                    fetch(`${API_URL}?action=getHolidays`, { redirect: 'follow' }) // 📌 ดึงข้อมูลวันหยุด
+                    fetch(`${API_URL}?action=getHolidays`, { redirect: 'follow' }) // ดึงวันหยุด
                 ]);
-                rawStatus = await res1.json(); rawSchedule = await res2.json(); rawHolidays = await res3.json();
+                rawStatus = await res1.json(); 
+                rawSchedule = await res2.json(); 
+                rawHolidays = await res3.json();
                 
                 localStorage.setItem('sciStatus', JSON.stringify(rawStatus));
                 localStorage.setItem('sciSchedule', JSON.stringify(rawSchedule));
@@ -272,7 +276,7 @@
             dates.forEach((d, idx) => {
                 const isToday = normalizeDate(d) === normalizeDate(new Date());
                 const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                const holiday = rawHolidays.find(h => h.dateString === dStr); 
+                const holiday = rawHolidays.find(h => h.dateString === dStr); // ตรวจสอบวันหยุด
                 
                 header.innerHTML += `
                     <th class="date-cell ${isToday && !holiday ? 'today-banner' : (holiday ? 'bg-red-50' : 'text-slate-900')}">
@@ -297,17 +301,16 @@
                 </td>`;
                 
                 dates.forEach((date, idx) => {
+                    const targetTime = normalizeDate(date);
+                    const isToday = targetTime === normalizeDate(new Date());
                     const dStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                     const holiday = rawHolidays.find(h => h.dateString === dStr);
 
-                    const target = normalizeDate(date);
-                    const isToday = target === normalizeDate(new Date());
-                    const schedule = rawSchedule.find(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.trim() === person.Name.trim());
-                    const isDirAbsent = rawSchedule.some(s => target >= normalizeDate(s.StartDate) && target <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
+                    const schedule = rawSchedule.find(s => targetTime >= normalizeDate(s.StartDate) && targetTime <= normalizeDate(s.EndDate) && s.Name.trim() === person.Name.trim());
+                    const isDirAbsent = rawSchedule.some(s => targetTime >= normalizeDate(s.StartDate) && targetTime <= normalizeDate(s.EndDate) && s.Name.includes('ฑิราณี'));
 
                     let content = '<div class="vivid-tick">✅</div>';
-                    
-                    if(holiday) {
+                    if (holiday) {
                         content = `<div class="text-[9px] md:text-[11px] font-bold text-red-500 flex flex-col items-center"><span class="text-base leading-none mb-0.5">🌴</span>หยุด</div>`;
                     } else if(schedule) { 
                         content = `<div onclick="showDetail('${person.Name}', '${schedule.Reason}', '${schedule.StartDate}', '${schedule.EndDate}')" class="vivid-cross">❌</div>`; 
@@ -326,24 +329,24 @@
             const y = viewDate.getFullYear(); const m = viewDate.getMonth();
             monthYear.innerText = new Intl.DateTimeFormat('th-TH', {month:'long', year:'numeric'}).format(viewDate);
             ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-black text-gray-400 text-[9px] py-1 uppercase">${d}</div>`);
+            
             const first = new Date(y, m, 1).getDay(); const days = new Date(y, m + 1, 0).getDate();
             for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
+            
             for(let d=1; d<=days; d++) {
-                const current = normalizeDate(new Date(y, m, d)); 
-                const isToday = current === normalizeDate(new Date()); 
-                const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
-                
+                const current = normalizeDate(new Date(y, m, d)); const isToday = current === normalizeDate(new Date()); const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
                 const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const holiday = rawHolidays.find(h => h.dateString === dStr);
 
                 let peopleList = isStarted ? rawStatus.map(p => {
                     const sched = rawSchedule.find(s => current >= normalizeDate(s.StartDate) && current <= normalizeDate(s.EndDate) && s.Name.trim() === p.Name.trim());
-                    if(holiday) return ''; 
+                    if(holiday) return ''; // ถ้าเป็นวันหยุด ไม่ต้องโชว์สถานะคนในปฏิทินรวม
                     return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold' : 'font-bold text-gray-400'}"><span>${p.Name.split(' ')[0]}</span><span>${sched ? '❌' : '✅'}</span></div>`;
                 }).join('') : '';
                 
-                grid.innerHTML += `<div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday ? 'ring-2 ring-blue-500 shadow-sm' : (holiday ? 'bg-red-50 border-red-100' : '')}">
-                    <div class="text-[9px] font-black mb-1 ${isToday ? 'text-blue-600' : (holiday ? 'text-red-500' : 'text-slate-400')} leading-tight">
+                grid.innerHTML += `
+                <div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday && !holiday ? 'ring-2 ring-blue-500 shadow-sm' : (holiday ? 'bg-red-50 border-red-100' : '')}">
+                    <div class="text-[9px] font-black mb-1 ${isToday && !holiday ? 'text-blue-600' : (holiday ? 'text-red-500' : 'text-slate-400')} leading-tight">
                         ${d} ${holiday ? `<span class="font-normal text-[7px] block truncate text-red-400 mt-0.5">${holiday.name}</span>` : ''}
                     </div>
                     <div class="flex-1">${peopleList}</div>
