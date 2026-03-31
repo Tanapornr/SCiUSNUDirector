@@ -55,11 +55,8 @@
         <div id="tab-home" class="tab-content">
             <div class="flex items-end justify-between mb-4 px-2">
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tighter">แผนปฏิบัติงาน 5 วัน</h2>
-                <div class="flex gap-2 items-center">
-                    <div class="flex items-center gap-1.5 text-[10px] text-emerald-600 font-black bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 rounded-lg shadow-sm">
-                        <span class="animate-pulse text-emerald-500">●</span> Real-time
-                    </div>
-                    <button onclick="forceRefresh()" class="text-[10px] text-slate-600 font-black bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:bg-slate-50 transition-all">🔄 รีเฟรช</button>
+                <div class="flex items-center gap-1.5 text-[10px] text-emerald-600 font-black bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 rounded-lg shadow-sm">
+                    <span class="animate-pulse text-emerald-500">●</span> Real-time
                 </div>
             </div>
             <div class="executive-card overflow-hidden">
@@ -173,7 +170,6 @@
     </div>
 
     <script>
-        // 🔴🔴 URL API ฝั่ง Google Sheet (กรุณาแก้ไขให้ตรงกับของคุณ) 🔴🔴
         const API_URL = 'https://script.google.com/macros/s/AKfycbz-W6FnwKgyULg_16awpAa5ePnMBd9ZQiaok2b9njDt8g0F0oBKoXk5SF_0zQNHLYHMoQ/exec';
         
         let rawStatus = []; let rawSchedule = []; let rawHolidays = [];
@@ -193,27 +189,16 @@
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0f172a&color=fff`; 
         }
 
-        // 🌴 ระบบฝังวันหยุดไว้ในหน้าเว็บโดยตรงเลย! (ประกันความชัวร์ 100%)
         function getFallbackHoliday(dateObj) {
             const m = String(dateObj.getMonth() + 1).padStart(2, '0');
             const d = String(dateObj.getDate()).padStart(2, '0');
             const md = `${m}-${d}`;
             const fixedHolidays = {
-                "01-01": "วันขึ้นปีใหม่",
-                "04-06": "วันจักรี",
-                "04-13": "วันสงกรานต์",
-                "04-14": "วันสงกรานต์",
-                "04-15": "วันสงกรานต์",
-                "05-01": "วันแรงงาน",
-                "05-04": "วันฉัตรมงคล",
-                "06-03": "เฉลิมฯ พระราชินี",
-                "07-28": "เฉลิมฯ ร.10",
-                "08-12": "วันแม่แห่งชาติ",
-                "10-13": "วันสวรรคต ร.9",
-                "10-23": "วันปิยมหาราช",
-                "12-05": "วันพ่อแห่งชาติ",
-                "12-10": "วันรัฐธรรมนูญ",
-                "12-31": "วันสิ้นปี"
+                "01-01": "วันขึ้นปีใหม่", "04-06": "วันจักรี", "04-13": "วันสงกรานต์",
+                "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงาน",
+                "05-04": "วันฉัตรมงคล", "06-03": "เฉลิมฯ พระราชินี", "07-28": "เฉลิมฯ ร.10",
+                "08-12": "วันแม่แห่งชาติ", "10-13": "วันสวรรคต ร.9", "10-23": "วันปิยมหาราช",
+                "12-05": "วันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี"
             };
             return fixedHolidays[md] || null;
         }
@@ -264,14 +249,7 @@
             }
         }
 
-        function forceRefresh() {
-            // ล้าง Cache วันหยุดออกให้หมด เพื่อบังคับดึงข้อมูลใหม่ที่แก้แล้ว
-            localStorage.removeItem('sciStatus');
-            localStorage.removeItem('sciSchedule');
-            localStorage.removeItem('sciHolidays');
-            loadAllData(true);
-        }
-
+        // โหลดข้อมูลแบบ Real-time ทุก 30 วินาที
         setInterval(() => { loadAllData(true, true); }, 30000);
 
         async function showTab(id) {
@@ -330,7 +308,6 @@
                 const isToday = normalizeDate(d) === normalizeDate(new Date());
                 const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 
-                // เช็คทั้งจาก Google API และ ระบบฝังในเว็บ (Fallback)
                 let hObj = rawHolidays.find(h => h.dateString === dStr); 
                 let hName = hObj ? hObj.name : getFallbackHoliday(d);
                 
