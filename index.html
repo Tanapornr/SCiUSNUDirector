@@ -170,10 +170,13 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz-W6FnwKgyULg_16awpAa5ePnMBd9ZQiaok2b9njDt8g0F0oBKoXk5SF_0zQNHLYHMoQ/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwIL_Zq4s5YpovPLaKlfG0IXde7gIHlB30-f3LAVLD-sgo7Eo_AF1PlQFhai69gR8gyAQ/exec';
         
         let rawStatus = []; let rawSchedule = []; let rawHolidays = [];
-        let viewDate = new Date(2026, 2, 30); 
+        
+        // 📌 ตั้งค่าตัวแปรเดือน/ปี ให้ยึดจาก "เดือนปัจจุบัน" (วันนี้) เสมอ!
+        let viewDate = new Date(); 
+        
         let isAdminAuthed = false; 
         let currentEditRowIndex = null;
         let currentEditName = "";
@@ -195,7 +198,7 @@
             const md = `${m}-${d}`;
             const fixedHolidays = {
                 "01-01": "วันขึ้นปีใหม่", "04-06": "วันจักรี", "04-13": "วันสงกรานต์",
-                "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงาน",
+                "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", 
                 "05-04": "วันฉัตรมงคล", "06-03": "เฉลิมฯ พระราชินี", "07-28": "เฉลิมฯ ร.10",
                 "08-12": "วันแม่แห่งชาติ", "10-13": "วันสวรรคต ร.9", "10-23": "วันปิยมหาราช",
                 "12-05": "วันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี"
@@ -249,7 +252,6 @@
             }
         }
 
-        // โหลดข้อมูลแบบ Real-time ทุก 30 วินาที
         setInterval(() => { loadAllData(true, true); }, 30000);
 
         async function showTab(id) {
@@ -362,18 +364,28 @@
         }
 
         function renderCalendar() {
-            const grid = document.getElementById('calendarGrid'); const monthYear = document.getElementById('calMonthYear'); grid.innerHTML = '';
-            const y = viewDate.getFullYear(); const m = viewDate.getMonth();
+            const grid = document.getElementById('calendarGrid'); 
+            const monthYear = document.getElementById('calMonthYear'); 
+            grid.innerHTML = '';
+            
+            const y = viewDate.getFullYear(); 
+            const m = viewDate.getMonth();
             monthYear.innerText = new Intl.DateTimeFormat('th-TH', {month:'long', year:'numeric'}).format(viewDate);
+            
             ["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(d => grid.innerHTML += `<div class="text-center font-black text-gray-400 text-[9px] py-1 uppercase">${d}</div>`);
             
-            const first = new Date(y, m, 1).getDay(); const days = new Date(y, m + 1, 0).getDate();
+            const first = new Date(y, m, 1).getDay(); 
+            const days = new Date(y, m + 1, 0).getDate();
+            
             for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
             
+            // วนลูปวาดปฏิทินแต่ละวัน
             for(let d=1; d<=days; d++) {
                 const currentDateObj = new Date(y, m, d);
                 const current = normalizeDate(currentDateObj); 
-                const isToday = current === normalizeDate(new Date()); 
+                
+                // 📌 เช็คว่าเป็น "วันนี้" (ของจริง) หรือไม่
+                const isRealToday = current === normalizeDate(new Date()); 
                 const isStarted = current >= normalizeDate(new Date(2026, 2, 30));
                 
                 const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -386,12 +398,16 @@
                     return `<div onclick="${sched ? `showDetail('${p.Name}', '${sched.Reason}', '${sched.StartDate}', '${sched.EndDate}')` : ''}" class="flex justify-between items-center text-[7px] mb-0.5 ${sched ? 'text-red-500 font-bold' : 'font-bold text-gray-400'}"><span>${p.Name.split(' ')[0]}</span><span>${sched ? '❌' : '✅'}</span></div>`;
                 }).join('') : '';
                 
+                // 📌 เน้นกรอบและพื้นหลังให้ "วันนี้" เด่นชัดที่สุด (กรอบสีน้ำเงินเข้ม, พื้นหลังสีฟ้าอ่อน)
+                const todayStyle = isRealToday && !hName ? 'ring-2 ring-blue-600 bg-blue-50/50 shadow-md border-transparent' : '';
+                const holidayStyle = hName ? 'bg-red-50 border-red-100' : (!isRealToday ? 'bg-white border-slate-100' : '');
+                
                 grid.innerHTML += `
-                <div class="min-h-[70px] bg-white border border-slate-100 rounded-xl p-1 flex flex-col ${isToday && !hName ? 'ring-2 ring-blue-500 shadow-sm' : (hName ? 'bg-red-50 border-red-100' : '')}">
-                    <div class="text-[9px] font-black mb-1 ${isToday && !hName ? 'text-blue-600' : (hName ? 'text-red-500' : 'text-slate-400')} leading-tight">
-                        ${d} ${hName ? `<span class="font-normal text-[7px] block truncate text-red-400 mt-0.5">${hName}</span>` : ''}
+                <div class="min-h-[70px] border rounded-xl p-1 flex flex-col ${todayStyle} ${holidayStyle}">
+                    <div class="text-[10px] font-black mb-1 ${isRealToday && !hName ? 'text-blue-700 bg-blue-100/50 rounded-md px-1 inline-block' : (hName ? 'text-red-500' : 'text-slate-500')} leading-tight">
+                        ${d} ${hName ? `<span class="font-normal text-[7.5px] block truncate text-red-400 mt-0.5">${hName}</span>` : ''}
                     </div>
-                    <div class="flex-1">${peopleList}</div>
+                    <div class="flex-1 mt-0.5">${peopleList}</div>
                 </div>`;
             }
         }
