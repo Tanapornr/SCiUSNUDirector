@@ -165,7 +165,7 @@
     <div id="loader" class="fixed inset-0 bg-white/70 backdrop-blur-md z-[100] flex items-center justify-center hidden">
         <div class="flex flex-col items-center">
             <div class="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-            <p class="mt-4 text-xs font-bold text-slate-600">กำลังซิงค์ข้อมูล...</p>
+            <p class="mt-4 text-xs font-bold text-slate-600">กำลังดาวน์โหลดข้อมูล...</p>
         </div>
     </div>
 
@@ -195,53 +195,49 @@
             const md = `${m}-${d}`;
             const fixedHolidays = {
                 "01-01": "วันขึ้นปีใหม่", "04-06": "วันจักรี", "04-13": "วันสงกรานต์",
-                "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-04": "วันฉัตรมงคล",
-                "06-03": "เฉลิมฯ พระราชินี", "07-28": "เฉลิมฯ ร.10", "08-12": "วันแม่แห่งชาติ",
-                "10-13": "วันสวรรคต ร.9", "10-23": "วันปิยมหาราช", "12-05": "วันพ่อแห่งชาติ",
-                "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี"
+                "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", 
+                "05-04": "วันฉัตรมงคล", "06-03": "เฉลิมฯ พระราชินี", "07-28": "เฉลิมฯ ร.10",
+                "08-12": "วันแม่แห่งชาติ", "10-13": "วันสวรรคต ร.9", "10-23": "วันปิยมหาราช",
+                "12-05": "วันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี"
             };
             return fixedHolidays[md] || null;
         }
 
-        // 🛡️ อัปเกรดระบบอ่านวันที่ให้ฉลาดขึ้น แก้ปัญหาเบราว์เซอร์สลับวัน/เดือน
         function normalizeDate(val) { 
             if (!val) return null; 
             if (val instanceof Date) return new Date(val.getTime()).setHours(0,0,0,0);
             
             let str = String(val).trim();
-            // เช็คเคสที่ Google Sheet ส่งมาเป็น DD/MM/YYYY (เช่น 08/05/2026)
             if (str.includes('/')) {
                 let parts = str.split(' ')[0].split('/');
                 if (parts.length === 3) {
-                    let d = parseInt(parts[0]);
-                    let m = parseInt(parts[1]) - 1;
-                    let y = parseInt(parts[2]);
-                    if (y > 2500) y -= 543; // แปลง พ.ศ. เป็น ค.ศ. (เผื่อไว้)
+                    let d = parseInt(parts[0]); let m = parseInt(parts[1]) - 1; let y = parseInt(parts[2]);
+                    if (y > 2500) y -= 543; 
                     return new Date(y, m, d).setHours(0,0,0,0);
                 }
             }
-            // เช็คเคสที่มาเป็น YYYY-MM-DD
             if (str.includes('-')) {
                 let parts = str.split(' ')[0].split('-');
                 if (parts.length === 3) {
-                    let y = parseInt(parts[0]);
-                    let m = parseInt(parts[1]) - 1;
-                    let d = parseInt(parts[2]);
+                    let y = parseInt(parts[0]); let m = parseInt(parts[1]) - 1; let d = parseInt(parts[2]);
                     return new Date(y, m, d).setHours(0,0,0,0);
                 }
             }
-            // Fallback ปกติ
             const dObj = new Date(val); 
             if (!isNaN(dObj.getTime())) return dObj.setHours(0,0,0,0); 
             return null;
         }
 
-        async function loadAllData(force = false, silent = false) {
+        // 🚀 ระบบ Background Sync (โหลดไวปานสายฟ้า)
+        async function loadAllData() {
+            // 1. ดึงของเก่าจากในเครื่องมาแสดงให้ดูทันทีก่อน (0.1 วิ)
             const cachedStatus = localStorage.getItem('sciStatus');
             const cachedSchedule = localStorage.getItem('sciSchedule');
             const cachedHolidays = localStorage.getItem('sciHolidays');
             
-            if (cachedStatus && cachedSchedule && !force) {
+            let hasValidCache = false;
+
+            if (cachedStatus && cachedSchedule) {
                 rawStatus = JSON.parse(cachedStatus); 
                 rawSchedule = JSON.parse(cachedSchedule); 
                 rawHolidays = cachedHolidays ? JSON.parse(cachedHolidays) : [];
@@ -250,15 +246,19 @@
                 if(!Array.isArray(rawSchedule)) rawSchedule = [];
                 if(!Array.isArray(rawHolidays)) rawHolidays = [];
 
-                renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
+                if(rawStatus.length > 0) {
+                    hasValidCache = true;
+                    renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
+                }
             } 
             
-            if (!silent && (!cachedStatus || force)) { 
+            // 2. ถ้าไม่มีข้อมูลในเครื่องเลย (เข้าเว็บครั้งแรก) ถึงจะแสดงวงกลมหมุน
+            if (!hasValidCache) { 
                 document.getElementById('loader').classList.remove('hidden'); 
             }
             
+            // 3. แอบไปดึงข้อมูลใหม่จาก Google Sheets มาอัปเดตให้เงียบๆ เบื้องหลัง
             try {
-                // บังคับให้ดึงข้อมูลใหม่เสมอ ป้องกันการติด Cache ฝั่งเซิร์ฟเวอร์
                 const noCache = new Date().getTime(); 
                 const [res1, res2, res3] = await Promise.all([
                     fetch(`${API_URL}?sheet=Status&t=${noCache}`, { redirect: 'follow' }),
@@ -272,31 +272,29 @@
                 rawSchedule = Array.isArray(d2) ? d2 : [];
                 rawHolidays = Array.isArray(d3) ? d3 : [];
                 
+                // อัปเดต Cache ใหม่
                 localStorage.setItem('sciStatus', JSON.stringify(rawStatus));
                 localStorage.setItem('sciSchedule', JSON.stringify(rawSchedule));
                 localStorage.setItem('sciHolidays', JSON.stringify(rawHolidays));
                 
+                // เรนเดอร์หน้าจอใหม่ทับของเดิมแบบเนียนๆ ไม่ให้ผู้ใช้รู้ตัว
                 renderHome(); renderCalendar(); populateAddSelect(); renderEditTable();
             } catch (e) { 
                 console.log("Background sync failed", e);
             } finally {
+                // ปิดวงกลมโหลด
                 document.getElementById('loader').classList.add('hidden');
             }
         }
 
-        setInterval(() => { loadAllData(true, true); }, 30000);
+        // โหลดข้อมูลแบบ Real-time เงียบๆ ทุก 30 วินาที
+        setInterval(() => { loadAllData(); }, 30000);
 
         async function showTab(id) {
             if (id === 'edit' && !isAdminAuthed) {
                 const { value: password } = await Swal.fire({
-                    title: '🔒 สำหรับเจ้าหน้าที่',
-                    input: 'password',
-                    showCancelButton: true,
-                    confirmButtonText: 'เข้าสู่ระบบ',
-                    cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#ef4444'
+                    title: '🔒 สำหรับเจ้าหน้าที่', input: 'password', showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#ef4444'
                 });
-                
                 if (password === '1234') { 
                     isAdminAuthed = true;
                     Swal.fire({ title: 'เข้าสู่ระบบสำเร็จ', icon: 'success', timer: 1000, showConfirmButton: false });
@@ -305,12 +303,10 @@
                     return; 
                 }
             }
-
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
             document.getElementById(`tab-${id}`).classList.remove('hidden');
             document.getElementById(`btn-${id}`).classList.add('tab-active');
-            
             if(id !== 'edit') cancelEdit();
         }
 
@@ -321,15 +317,11 @@
         }
 
         function showDetail(name, reason, start, end) {
-            // ป้องกันการแปลงวันที่ผิดในหน้าต่าง Popup
-            const sDate = new Date(normalizeDate(start));
-            const eDate = new Date(normalizeDate(end));
-            const startDateStr = sDate.toLocaleDateString('th-TH', { day:'numeric', month:'short' });
-            const endDateStr = eDate.toLocaleDateString('th-TH', { day:'numeric', month:'short' });
-            
+            const startDate = new Date(start).toLocaleDateString('th-TH', { day:'numeric', month:'short' });
+            const endDate = new Date(end).toLocaleDateString('th-TH', { day:'numeric', month:'short' });
             Swal.fire({
                 title: `<p class="text-[10px] font-black text-slate-400 uppercase mb-1">Absence Detail</p><p class="text-base font-black">${name}</p>`,
-                html: `<div class="py-2"><p class="text-base font-bold text-red-500 mb-2">"${reason}"</p><p class="text-xs font-bold text-slate-400">ช่วงวันที่: ${startDateStr} - ${endDateStr}</p></div>`,
+                html: `<div class="py-2"><p class="text-base font-bold text-red-500 mb-2">"${reason}"</p><p class="text-xs font-bold text-slate-400">ช่วงวันที่: ${startDate} - ${endDate}</p></div>`,
                 confirmButtonText: 'รับทราบ', confirmButtonColor: '#0f172a'
             });
         }
@@ -360,6 +352,7 @@
 
             rawStatus.forEach(person => {
                 let imgUrl = getProfileImage(person.Name);
+                
                 let row = `<tr class="bg-white"><td class="name-cell border-b border-gray-50">
                     <div class="flex items-center gap-2 md:gap-3">
                         <img src="${imgUrl}" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-slate-200 shadow-sm shrink-0 bg-slate-100">
@@ -510,6 +503,7 @@
             
             btn.disabled = true; btn.innerHTML = 'กำลังบันทึก...';
             try { 
+                // บันทึกข้อมูลและสั่งให้โหลดข้อมูลใหม่ทันที
                 await fetch(API_URL, { method:'POST', body: JSON.stringify(data) }); 
                 Swal.fire({ title: 'สำเร็จ!', icon: 'success', confirmButtonColor: '#0f172a' }); 
                 document.getElementById('addStartDate').value = ''; 
@@ -586,8 +580,7 @@
             }
         }
 
-        // เคลียร์ Cache ชั่วคราวเพื่อให้เบราว์เซอร์ดึงข้อมูลใหม่ทั้งหมดหลังอัปเดตระบบ
-        localStorage.clear();
+        // เริ่มต้นการทำงาน (โหลดข้อมูลทันที)
         loadAllData();
     </script>
 </body>
